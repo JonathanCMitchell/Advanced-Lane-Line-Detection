@@ -1,1 +1,4 @@
 .ipynb*
+
+/test_images/
+*.p

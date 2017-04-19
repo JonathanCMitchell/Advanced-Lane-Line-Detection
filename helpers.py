@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import cv2
+import settings
 
 def add_recent_centers(num, lst, arrayToTakeCentersFrom, smooth):
     print('inside add_recent_centers lst is :', lst)

@@ -27,7 +27,7 @@ class LaneLineFinder():
         self.recent_centers = []
         self.smooth_factor = 15
         self.prev_left_center = 185
-        self.prev_right_center = 376
+        self.prev_right_center = 370
         self.left_recent_centers_averaged = []
         self.right_recent_centers_averaged = []
         self.recent_centers_averaged = []
@@ -76,7 +76,7 @@ class LaneLineFinder():
 
         road_lines = self.draw_lines(left_lane, right_lane, left_fitx, right_fitx, y_values)
         # points now is an array containing [left_points, right_points]
-        return road_lines
+        return road_lines, weighted, mask
 
     #         return road_lines, weighted, mask
 
@@ -87,6 +87,11 @@ class LaneLineFinder():
                               margin_width,
                               margin_height,
                               FLAG):
+        self.count += 1
+        if self.count > 20:
+            self.count = 0
+            self.prev_left_center = settings.RESET_LEFT_CENTER
+            self.prev_right_center = settings.RESET_RIGHT_CENTER
         img_width = self.img_size[0]  # 500
         img_height = self.img_size[1]  # 600
 
@@ -121,9 +126,16 @@ class LaneLineFinder():
         good_rights = right_signal[right_signal > 100]
         good_lefts = left_signal[left_signal > 100]
 
-        if (len(good_rights)) < 50:
+        print('good_rights: ', len(good_rights))
+        print('good_lefts: ', len(good_lefts))
+
+
+        if (len(good_rights)) < 30:
             self.usePrevRight = True
-        if (len(good_lefts)) < 50:
+
+            # TODO: Take this out
+            return self.recent_centers_averaged
+        if (len(good_lefts)) < 30:
             self.usePrevLeft = True
 
             # reset line somehow
@@ -151,6 +163,7 @@ class LaneLineFinder():
         #         print('left_max: ', left_max)
         #         print('right_max: ', right_max)
 
+        # TODO: After ~30 runs, reset the prev_right_center back to default
 
         # conditionals to check first centroid
         if abs(self.prev_right_center - right_max) < 20:
@@ -223,6 +236,7 @@ class LaneLineFinder():
                 left_recent_centers.append(self.recent_centers[i][0])
                 right_recent_centers.append(self.recent_centers[i][1])
 
+        # TODO: Fix: The recent centers just get reassigned each time, not added
         self.left_recent_centers_averaged = moving_average_scale(left_recent_centers)
         self.right_recent_centers_averaged = moving_average_scale(right_recent_centers)
 
@@ -235,9 +249,12 @@ class LaneLineFinder():
         # TODO: If we have any flags for either left or right lane lines then roll:
         if self.usePrevLeft == True:
             print('usePrevLeft triggered')
+            print('left_recent_centers averaged length: ', len(self.left_recent_centers_averaged))
             self.left_recent_centers_averaged = np.roll(self.left_recent_centers_averaged, len(left_recent_centers))
         if self.usePrevRight == True:
             print('usePrevRight triggered')
+            print('right_recent_centers averaged length: ', len(self.right_recent_centers_averaged))
+            print('self.right_recent_centers_averaged: ', self.right_recent_centers_averaged)
             self.right_recent_centers_averaged = np.roll(self.right_recent_centers_averaged, len(right_recent_centers))
 
 

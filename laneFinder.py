@@ -24,6 +24,7 @@ class LaneFinder():
         self.left_line = LaneLineFinder(warped_size, x_pixels_per_meter, y_pixels_per_meter, kind='left')
         self.right_line = LaneLineFinder(warped_size, self.x_pixels_per_meter, self.y_pixels_per_meter, kind='right')
         self.found_both = False
+        self.previous_lanes = []
 
     def warp(self, img):
         return cv2.warpPerspective(img, self.transform_matrix, self.warped_size,
@@ -142,16 +143,26 @@ class LaneFinder():
         self.total_mask = cv2.morphologyEx(self.total_mask, cv2.MORPH_ERODE, small_ellipse)
 
         left_mask = self.total_mask
-        right_mask = self.total_mask
-        if self.right_line.found:
-            # left mask is NOT the right line mask and not the right line's other mask, this mask is binary
-            left_mask = self.total_mask & np.logical_not(self.right_line.line_mask) & self.right_line.other_mask
-        if self.left_line.found:
-            right_mask = self.total_mask & np.logical_note(self.left_line.lin_mask) & self.left_line.other_mask
+        # right_mask = self.total_mask
+        # if self.right_line.found:
+        #     # left mask is NOT the right line mask and not the right line's other mask, this mask is binary
+        #     left_mask = self.total_mask & np.logical_not(self.right_line.line_mask)
+        # if self.left_line.found:
+        # right_mask = self.total_mask & np.logical_note(self.left_line.line_mask)
+
+
+        # TODO: Check if lines are found, if not, use the previous lane lines
+
 
         #
         # if self.left_line.isGood and self.right_line.isGood:
         #     lanes = (self.left_line + self.right_line) & mask
 
+        # TODO: IMplement what happens when we find a lane or don't find a lane
         lanes = self.left_line.find_lane_line(left_mask, FLAG)
-        return lanes
+        if self.left_line.found:
+            self.previous_lanes = []
+            self.previous_lanes.append(lanes)
+            return lanes
+        else:
+            return self.previous_lanes[0]

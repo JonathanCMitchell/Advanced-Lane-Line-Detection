@@ -46,8 +46,6 @@ class LaneLineFinder():
         """
         # TODO: Create conditional in case not enough centroids are found, to use previous centroids
 
-
-
         img_width = self.img_size[0]  # 500
         img_height = self.img_size[1]  # 600
 
@@ -68,15 +66,18 @@ class LaneLineFinder():
         # To check accuracy of window centroids
         weighted, mask = draw_lines_weighted(left_pts, right_pts, mask)
 
-        left_lane, right_lane, left_fitx, right_fitx, y_values = self.fit_lines(window_centroids,
+        left_lane, right_lane, left_fitx, right_fitx, y_values_left, y_values_right = self.fit_lines(window_centroids,
                                                                                 leftx,
                                                                                 rightx,
                                                                                 self.window_width,
                                                                                 self.window_height)
 
-        road_lines = self.draw_lines(left_lane, right_lane, left_fitx, right_fitx, y_values)
+        road_lines = self.draw_lines(left_lane, right_lane, left_fitx, right_fitx, y_values_left, y_values_right)
         # points now is an array containing [left_points, right_points]
-        return road_lines, weighted, mask
+
+        return road_lines
+        # TODO: Uncomment below for testing
+        # return road_lines, weighted, mask
 
     #         return road_lines, weighted, mask
 
@@ -87,6 +88,7 @@ class LaneLineFinder():
                               margin_width,
                               margin_height,
                               FLAG):
+        # TODO: Create new pipeline for finding window centroids, and to find out which values are good to keep from the conv_signals
         self.count += 1
         if self.count > 20:
             self.count = 0
@@ -115,33 +117,24 @@ class LaneLineFinder():
         right_signal = np.convolve(window, right_sum)
         right_max = np.argmax(right_signal) + window_horizontal_start
 
-        # from scipy.stats import describe
-
-        #         print('type of left_signal: ', type(left_signal))
-        #         print('left signal shape: ', left_signal.shape)
-        #         print('mean value of left signal: ', np.mean(left_signal))
-        #         print('left signal describe ', describe(left_signal))
-        # print('right_signal shape: ', right_signal.shape)
-        # print('describe right signal: ', describe(right_signal))
-        good_rights = right_signal[right_signal > 100]
-        good_lefts = left_signal[left_signal > 100]
+        good_rights = right_signal[right_signal > 200]
+        good_lefts = left_signal[left_signal > 200]
 
         print('good_rights: ', len(good_rights))
         print('good_lefts: ', len(good_lefts))
 
-
         if (len(good_rights)) < 30:
             self.usePrevRight = True
+            # TODO: Say self. is not found
+            self.found = False
+        else:
+            self.found = True
 
-            # TODO: Take this out
-            return self.recent_centers_averaged
         if (len(good_lefts)) < 30:
             self.usePrevLeft = True
-
-            # reset line somehow
-            print('we have bad rights')
-
-            self.right_line_isbad = True
+            self.found = False
+        else:
+            self.found = True
         print('good_rights: ', good_rights)
         #         print('left_signal: ', left_signal)
         #         good_left_signals = left_signal[np.where(left_signal < 650)] = 0
@@ -271,63 +264,48 @@ class LaneLineFinder():
 
         print('RECENT_CENTERS_AVERAGED: ', self.recent_centers_averaged)
 
+
+
         return self.recent_centers_averaged
 
 
     def fit_lines(self, window_centroids, leftx, rightx, window_width, window_height):
-
         # TODO: uneven lengths for y values
         if len(leftx) == len(rightx):
             vert_start = self.img_size[1] - window_height / 2
             vert_stop = window_height
-            y_values = np.linspace(vert_start, vert_stop, len(leftx), dtype=np.float32)
-
+            y_values_left = np.linspace(vert_start, vert_stop, len(leftx), dtype=np.float32)
+            y_values_right = np.linspace(vert_start, vert_stop, len(rightx), dtype=np.float32)
         # fit to a polynomial (ax^2 + bx + c)
-        left_fit = np.polyfit(y_values, leftx, 2)
-        left_fitx = left_fit[0] * (y_values ** 2) + left_fit[1] * y_values + left_fit[2]
+        left_fit = np.polyfit(y_values_left, leftx, 2)
+        left_fitx = left_fit[0] * (y_values_left ** 2) + left_fit[1] * y_values_left + left_fit[2]
         left_fitx = np.array(left_fitx, np.int32)
 
-        right_fit = np.polyfit(y_values, rightx, 2)
-        right_fitx = right_fit[0] * (y_values ** 2) + right_fit[1] * y_values + right_fit[2]
+        right_fit = np.polyfit(y_values_right, rightx, 2)
+        right_fitx = right_fit[0] * (y_values_right ** 2) + right_fit[1] * y_values_right + right_fit[2]
         right_fitx = np.array(right_fitx, np.int32)
+        # TODO: Remove this concatenate piece
         shift = 0
+        left_lane = np.array(list(zip(np.concatenate((left_fitx - window_width / 10 + shift, left_fitx[::-1] + window_width / 10 + shift),axis=0),np.concatenate((y_values_left, y_values_left[::-1]), axis=0))), dtype=np.int32)
+        right_lane = np.array(list(zip(np.concatenate((right_fitx - window_width / 10 + shift, right_fitx[::-1] + window_width / 10 + shift),axis=0), np.concatenate((y_values_right, y_values_right[::-1]), axis=0))), dtype=np.int32)
+        return left_lane, right_lane, left_fitx, right_fitx, y_values_left, y_values_right
 
-        left_lane = np.array(list(zip(
-            np.concatenate((left_fitx - window_width / 10 + shift, left_fitx[::-1] + window_width / 10 + shift),
-                           axis=0),
-            np.concatenate((y_values, y_values[::-1]), axis=0))), dtype=np.int32)
-
-        right_lane = np.array(list(zip(
-            np.concatenate((right_fitx - window_width / 10 + shift, right_fitx[::-1] + window_width / 10 + shift),
-                           axis=0),
-            np.concatenate((y_values, y_values[::-1]), axis=0))), dtype=np.int32)
-
-        return left_lane, right_lane, left_fitx, right_fitx, y_values
-
-    def draw_lines(self, left_lane, right_lane, left_fitx, right_fitx, y_values):
+    def draw_lines(self, left_lane, right_lane, left_fitx, right_fitx, y_values_left, y_values_right):
         lanes = np.zeros((self.img_size[1], self.img_size[0], 3), dtype=np.uint8)
         cv2.fillPoly(lanes, [left_lane], color=[255, 0, 0])
         cv2.fillPoly(lanes, [right_lane], color=[0, 255, 0])
         #         ym_per_pix = 1/self.y_pixels_per_meter
         #         xm_per_pix = 1/self.x_pixels_per_meter
-
-
         #         ym_per_pix = self.y_pixels_per_meter
         #         xm_per_pix = self.x_pixels_per_meter
-
         #         curve_fit_cr = np.polyfit(np.array(y_values, np.float32)
         #                                   * ym_per_pix, np.array(left_fitx, np.float32) * xm_per_pix, 2)
         #         curverad = ((1 + (2*curve_fit_cr[0] * y_values[-1] * ym_per_pix + curve_fit_cr[1]) **2) ** 1.5) / np.absolute(2 * curve_fit_cr[0])
-
-
         #         camera_center = (left_fitx[-1] + right_fitx[-1]) / 2
         #         center_diff = (camera_center - self.img_size[0]/2) * xm_per_pix
-
         #         side_pos = 'left'
         #         if center_diff <= 0:
         #             side_pos = 'right'
-
-
         #         cv2.putText(lanes, 'Radius of curvature = ' + str(round(curverad, 3)) + '(m)', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
         #         cv2.putText(lanes, 'Vehicle is ' + str(abs(round(center_diff, 3))) + 'm ' + side_pos + ' of center', (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
         return lanes
@@ -339,28 +317,21 @@ class LaneLineFinder():
         # Points we will use for drawing on each level
         left_points = np.zeros_like(mask)
         right_points = np.zeros_like(left_points)
-
         left_x = []
         right_x = []
-
         #         print('inside get_line_pts window_centroids are :', window_centroids)
         #         print('inside get_line_pts window_centroids type :', type(window_centroids))
-
-
         for level in range(0, len(window_centroids)):
             # window_mask if a function to draw window boxes
             left_x.append(window_centroids[level][0])
             right_x.append(window_centroids[level][1])
-
             left_mask = draw_window_box(mask, self.window_width, self.window_height,
                                         window_centroids[level][0],
                                         level)
             right_mask = draw_window_box(mask, self.window_width, self.window_height,
                                          window_centroids[level][1],
                                          level)
-
             left_points[(left_points == 255) | ((left_mask == 1))] = 255
             right_points[(right_points == 255) | ((right_mask == 1))] = 255
-
         return [left_points, right_points], [left_x, right_x]
 

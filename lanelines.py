@@ -33,12 +33,15 @@ lf = LaneFinder(settings.ORIGINAL_SIZE, settings.UNWARPED_SIZE, camera_matrix, d
 # processed_img = lf.process_image(img)
 
 # Process many images from pandas directory
-for i in range(91, 101):
+for i in range(90, 95):
     print('COUNT: ', i)
     row = df.iloc[[i]]
     impath = df.iloc[[i]]['image_path'].values[0]
     img = mpimg.imread(impath)
-    road_lines, weighted, mask  = lf.find_lane(img)
+
+    road_lines = lf.find_lane(img)
+    # TODO: Uncomment below for testing
+    # road_lines, weighted, mask  = lf.find_lane(img)
     # cv2.imwrite('./results/' + str(i) + 'road_lines' + '.jpg', cv2.cvtColor(road_lines, cv2.COLOR_BGR2RGB))
     # cv2.imwrite('./results/' + str(i) + 'weighted' + '.jpg', cv2.cvtColor(weighted, cv2.COLOR_BGR2RGB))
     # cv2.imwrite('./results/' + str(i) + 'mask' + '.jpg', mask)

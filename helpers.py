@@ -77,7 +77,6 @@ def draw_lines_weighted(left_points, right_points, mask):
     tmp[:, :, 0] = np.zeros_like(template)
     tmp[:, :, 1] = template[:, :]
     tmp[:, :, 2] = tmp[:, :, 0]
-
     combine_mask = np.array(cv2.merge((mask, mask, mask))).astype(np.uint8)
     weighted = cv2.addWeighted(combine_mask, 1, tmp, 0.5, 0.0)
     return weighted, mask

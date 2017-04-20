@@ -151,3 +151,6 @@ class LaneLineFinder():
         # TODO: use previous line points as an anchor for next line x_base
         # TODO: use previous line points as an anchor for next x_current
 
+
+    def get_curvature(self):
+        pass

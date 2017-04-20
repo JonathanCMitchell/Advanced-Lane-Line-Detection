@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import settings
 from laneLineFinder import LaneLineFinder
+import matplotlib.pyplot as plt
 
 class LaneFinder():
     def __init__(self,
@@ -156,6 +157,10 @@ class LaneFinder():
 
         self.left_line.find_lane_line(self.total_mask)
         self.right_line.find_lane_line(self.total_mask)
+
+        plt.imshow(self.left_line.line)
+        plt.imshow(self.right_line.line)
+        plt.show()
         #
         # if self.left_line.isGood and self.right_line.isGood:
         #     lanes = (self.left_line + self.right_line) & mask

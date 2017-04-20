@@ -33,13 +33,13 @@ lf = LaneFinder(settings.ORIGINAL_SIZE, settings.UNWARPED_SIZE, camera_matrix, d
 # processed_img = lf.process_image(img)
 
 # Process single individual image
-impath1 = './test_images/test2.jpg'
-impath2 = './test_images/test3.jpg'
-img1 = mpimg.imread(impath1)
-img2 = mpimg.imread(impath2)
-
-lf.find_lane(img1)
-lf.find_lane(img2)
+# impath1 = './test_images/test2.jpg'
+# impath2 = './test_images/test3.jpg'
+# img1 = mpimg.imread(impath1)
+# img2 = mpimg.imread(impath2)
+#
+# lf.find_lane(img1)
+# lf.find_lane(img2)
 
 # returned = lf.left_line.find_lane_line(lf.total_mask)
 # plt.imshow(returned)

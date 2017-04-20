@@ -26,13 +26,13 @@ class LaneLineFinder():
         self.found = False
         self.first = True
         self.kind = kind
-        self.lane = np.zeros((img_size[1], img_size[0], 3), dtype = np.uint8)
+        self.line = np.zeros((img_size[1], img_size[0], 3), dtype = np.uint8)
         self.line_mask = np.ones((img_size[1], img_size[0]), dtype=np.uint8) # create 2D line mask
         self.img_width = img_size[0]
         self.img_height = img_size[1]
         self.first_coeffs = np.array([], dtype = np.float64)
         self.next_coeffs = np.array([], dtype = np.float64)
-        self.out_img = np.zeros_like(self.lane)
+        self.out_img = np.zeros_like(self.line)
         self.firstMargin = 50
         self.nextMargin = 50
 
@@ -48,10 +48,8 @@ class LaneLineFinder():
             self.get_next_coeffs(mask, self.kind)
             fitx, ploty = self.get_line_pts(self.next_coeffs)
 
-        out_image = self.draw_lines(mask, 'LEFT', fitx, ploty)
+        self.line = self.draw_lines(mask, 'LEFT', fitx, ploty)
 
-
-        return self.out_img
 
     def get_next_coeffs(self, mask, kind):
         nonzero = mask.nonzero()
@@ -85,18 +83,20 @@ class LaneLineFinder():
         line_window2 = np.array([np.flipud(np.transpose(np.vstack([fitx + self.nextMargin, ploty])))])
         line_pts = np.hstack((line_window1, line_window2))
 
+
+        lane = np.array(list(zip(fitx, ploty)), np.int32)
         # draw the lane
         cv2.fillPoly(window_img, np.int_([line_pts]), (0, 255, 0))
-        # cv2.polylines(out_img, [fitx, ploty], (0, 255, 0))
+        cv2.fillPoly(out_img, [lane], (0, 255, 0))
 
-        result = cv2.addWeighted(out_img, 1, window_img, 0.3, 0)
-        plt.imshow(result)
-        plt.plot(fitx, ploty, color='yellow')
-        plt.xlim(0, self.img_width)
-        plt.ylim(self.img_height, 0)
-        plt.show()
-
-        return result
+        return out_img
+        # result = cv2.addWeighted(out_img, 1, window_img, 0.3, 0)
+        # plt.imshow(out_img)
+        # plt.plot(fitx, ploty, color='yellow')
+        # plt.xlim(0, self.img_width)
+        # plt.ylim(self.img_height, 0)
+        # plt.show()
+        #
         #
         # out_img[x, y] = [255, 0, 0]
         #

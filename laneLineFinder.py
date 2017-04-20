@@ -40,7 +40,7 @@ class LaneLineFinder():
 
         if self.first:
             self.get_first_coeffs(mask, self.kind)
-            fitx, ploty = self.get_line_pts(self.first_coeffs)
+            fitx, ploty  = self.get_line_pts(self.first_coeffs)
             self.first = False
 
         # if we are not on the first image
@@ -62,7 +62,6 @@ class LaneLineFinder():
                     (nonzerox < self.first_coeffs[0] * (nonzeroy ** 2) + self.first_coeffs[1] * nonzeroy + self.first_coeffs[2] + self.nextMargin)
 
         # TODO: If count > 1 should be self.prev_coeffs instead of self.first_coeffs
-
         x = nonzerox[lane_inds]
         y = nonzeroy[lane_inds]
 
@@ -73,7 +72,21 @@ class LaneLineFinder():
         fitx = coeffs[0] * ploty ** 2 + coeffs[1] * ploty + coeffs[2]
         return fitx, ploty
 
+    def draw_pw(self, img, pts, color):
+        pts = np.int_(pts)
+        for i in range(len(pts) - 1):
+            x1 = pts[i][0]
+            y1 = pts[i][1]
+            x2 = pts[i+1][0]
+            y2 = pts[i+1][1]
+            cv2.line(img, (x1, y1), (x2, y2), color, 15)
+        return img
+
     def draw_lines(self, mask, fitx, ploty):
+
+        if self.kind == 'LEFT': color = (100, 200, 20)
+        if self.kind == 'RIGHT': color = (200, 100, 20)
+
         out_img = np.dstack((mask, mask, mask)) * 255
         window_img = np.zeros_like(out_img)
 
@@ -81,10 +94,24 @@ class LaneLineFinder():
         line_window2 = np.array([np.flipud(np.transpose(np.vstack([fitx + self.nextMargin, ploty])))])
         line_pts = np.hstack((line_window1, line_window2))
 
-        lane = np.array(list(zip(fitx, ploty)), np.int32)
+        lane_points = np.array(list(zip(fitx, ploty)), np.int32)
         # draw the lane
-        cv2.fillPoly(window_img, np.int_([line_pts]), (0, 255, 0))
-        cv2.fillPoly(out_img, [lane], (0, 255, 0))
+        cv2.fillPoly(window_img, np.int_([line_pts]), (0, 20, 200))
+
+
+
+        out_img = self.draw_pw(out_img, lane_points, color)
+
+
+        # cv2.fillPoly(out_img, [lane_points], (20, 230, 100))
+        # cv2.addWeighted(out_img, 1, window_img, 0.3, 0)
+
+        # plt.plot(fitx, ploty, color = 'green')
+        # plt.imshow(out_img)
+        # plt.xlim(0, 600)
+        # plt.title('show green line')
+        # plt.ylim(500, 0)
+        # plt.show()
         return out_img
 
     def get_first_coeffs(self, mask, kind):
@@ -122,11 +149,15 @@ class LaneLineFinder():
             good_inds = ((nonzeroy >= win_y_low) & (nonzeroy < win_y_high) & (nonzerox >= win_x_low)
                          & (nonzerox < win_x_high)).nonzero()[0]
 
-            lane_inds.append(good_inds)
-
+            # lane_inds.append(good_inds)
+            print('length good inds: ', len(good_inds))
             # recenter onto the mean position if we found > minpix
             if len(good_inds) > minpix:
                 x_current = np.int(np.mean(nonzerox[good_inds]))
+
+            # If we get more than 5 good indices then we append
+            if len(good_inds) > 5:
+                lane_inds.append(good_inds)
 
         # Concatenate the arrays of indices
         lane_inds = np.concatenate(lane_inds)

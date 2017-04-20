@@ -48,12 +48,13 @@ lf = LaneFinder(settings.ORIGINAL_SIZE, settings.UNWARPED_SIZE, camera_matrix, d
 
 
 # PROCESS MULTIPLE IMAGES
-for i in range(0, 20):
+for i in range(2,6):
     print('COUNT: ', i)
     row = df.iloc[[i]]
     impath = df.iloc[[i]]['image_path'].values[0]
     img = mpimg.imread(impath)
     lf.find_lane(img)
+
 
 
 # warped = lf.warp(img)

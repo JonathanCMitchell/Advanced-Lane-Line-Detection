@@ -39,7 +39,7 @@ class LaneFinder():
         return cv2.undistort(img, self.camera_matrix, self.dist_coeffs)
 
     def add_weighted(self, base, lines):
-        return cv2.addWeighted(base, 1.0, lines, .6, 0.0)
+        return cv2.addWeighted(base, 1.0, lines, 2, 0.0)
 
     def process_image(self, image):
         """
@@ -157,8 +157,11 @@ class LaneFinder():
         self.left_line.find_lane_line(self.total_mask)
         self.right_line.find_lane_line(self.total_mask)
 
-        plt.imshow(self.left_line.line)
-        plt.imshow(self.right_line.line)
+        # plt.imshow(self.left_line.line)
+
+        weighted = self.add_weighted(warped, self.left_line.line)
+        plt.imshow(weighted)
+
         plt.show()
 
         # TODO: Add weighted between left line and image,

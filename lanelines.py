@@ -32,7 +32,17 @@ lf = LaneFinder(settings.ORIGINAL_SIZE, settings.UNWARPED_SIZE, camera_matrix, d
 # img = mpimg.imread(impath)
 # processed_img = lf.process_image(img)
 
-# Process many images from pandas directory
+# Process single individual image
+# impath = './test_images/test3.jpg'
+# img = mpimg.imread(impath)
+# road_lines = lf.find_lane(img)
+# warped = lf.warp(img)
+# drawn_on = lf.add_weighted(warped, road_lines)
+# plt.imshow(drawn_on)
+# cv2.imwrite('./results/' + impath + 'test3' + '.jpg', cv2.cvtColor(drawn_on, cv2.COLOR_BGR2RGB))
+# plt.show()
+#
+# # Process many images from pandas directory
 for i in range(90, 95):
     print('COUNT: ', i)
     row = df.iloc[[i]]
@@ -64,5 +74,5 @@ for i in range(90, 95):
 #     cv2.imwrite('./results/' + str(i) + 'mask' + '.jpg', mask)
 
 # plt.imshow(processed_img)
-plt.show()
+# plt.show()
 

@@ -25,6 +25,7 @@ class LaneFinder():
         self.right_line = LaneLineFinder(warped_size, self.x_pixels_per_meter, self.y_pixels_per_meter, kind='right')
         self.found_both = False
         self.previous_lanes = []
+        self.count = 0
 
     def warp(self, img):
         return cv2.warpPerspective(img, self.transform_matrix, self.warped_size,
@@ -66,7 +67,7 @@ class LaneFinder():
 
 
 
-    def find_lane(self, image, distorted=True, FLAG=False):
+    def find_lane(self, image, distorted=True, reset = False):
         """
         Pipeline:
         1) Undistort
@@ -74,9 +75,9 @@ class LaneFinder():
         3) Blur
         4) Convert to HLS and LAB and use the Luminance channel to identify yellow lines
         """
-        if FLAG == True:
+        if reset == True:
             self.left_line.reset_lane_line()
-            self.right_line.reset_lane_lin()
+            self.right_line.reset_lane_line()
 
         # 1) Undistort the image
         img = self.undistort(image)
@@ -159,10 +160,6 @@ class LaneFinder():
         #     lanes = (self.left_line + self.right_line) & mask
 
         # TODO: IMplement what happens when we find a lane or don't find a lane
-        lanes = self.left_line.find_lane_line(left_mask, FLAG)
-        if self.left_line.found:
-            self.previous_lanes = []
-            self.previous_lanes.append(lanes)
-            return lanes
-        else:
-            return self.previous_lanes[0]
+        # TODO: Decision, do you want to check for lane lines and use previous ones here or inside LaneLineFinder?
+        lanes = self.left_line.find_lane_line(left_mask, reset = True)
+        return lanes

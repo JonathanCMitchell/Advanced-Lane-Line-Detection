@@ -48,7 +48,7 @@ class LaneLineFinder():
             self.get_next_coeffs(mask, self.kind)
             fitx, ploty = self.get_line_pts(self.next_coeffs)
 
-        self.line = self.draw_lines(mask, 'LEFT', fitx, ploty)
+        self.line = self.draw_lines(mask, fitx, ploty)
 
 
     def get_next_coeffs(self, mask, kind):
@@ -73,9 +73,7 @@ class LaneLineFinder():
         fitx = coeffs[0] * ploty ** 2 + coeffs[1] * ploty + coeffs[2]
         return fitx, ploty
 
-
-    def draw_lines(self, mask, kind, fitx, ploty):
-
+    def draw_lines(self, mask, fitx, ploty):
         out_img = np.dstack((mask, mask, mask)) * 255
         window_img = np.zeros_like(out_img)
 
@@ -83,48 +81,11 @@ class LaneLineFinder():
         line_window2 = np.array([np.flipud(np.transpose(np.vstack([fitx + self.nextMargin, ploty])))])
         line_pts = np.hstack((line_window1, line_window2))
 
-
         lane = np.array(list(zip(fitx, ploty)), np.int32)
         # draw the lane
         cv2.fillPoly(window_img, np.int_([line_pts]), (0, 255, 0))
         cv2.fillPoly(out_img, [lane], (0, 255, 0))
-
         return out_img
-        # result = cv2.addWeighted(out_img, 1, window_img, 0.3, 0)
-        # plt.imshow(out_img)
-        # plt.plot(fitx, ploty, color='yellow')
-        # plt.xlim(0, self.img_width)
-        # plt.ylim(self.img_height, 0)
-        # plt.show()
-        #
-        #
-        # out_img[x, y] = [255, 0, 0]
-        #
-        # # visualize
-        # # Create an image to draw on and an image to show the selection window
-        # out_img = np.dstack((mask, mask, mask)) * 255
-        # window_img = np.zeros_like(out_img)
-        # # Color in left and right line pixels
-        # out_img[nonzeroy[lane_inds], nonzerox[lane_inds]] = [255, 0, 0]
-        #
-        # # Generate a polygon to illustrate the search window area
-        # # And recast the x and y points into usable format for cv2.fillPoly()
-        # line_window1 = np.array([np.transpose(np.vstack([next_fitx - self.nextMargin, ploty]))])
-        # line_window2 = np.array([np.flipud(np.transpose(np.vstack([next_fitx + self.nextMargin, ploty])))])
-        # line_pts = np.hstack((line_window1, line_window2))
-        #
-        # # Draw the lane onto the warped blank image
-        # cv2.fillPoly(window_img, np.int_([line_pts]), (0, 255, 0))
-        # result = cv2.addWeighted(out_img, 1, window_img, 0.3, 0)
-        # plt.imshow(result)
-        # plt.plot(next_fitx, ploty, color='yellow')
-        # plt.xlim(0, self.img_width)
-        # plt.ylim(self.img_height, 0)
-        # plt.show()
-
-
-
-        return next_fitx
 
     def get_first_coeffs(self, mask, kind):
         histogram = np.sum(mask[int(mask.shape[0]/2):,:], axis = 0)
@@ -137,7 +98,6 @@ class LaneLineFinder():
             x_base = np.argmax(histogram[midpoint:]) + midpoint
 
         n_windows = 9
-
         window_height = np.int(self.img_height // n_windows)
 
         nonzero = mask.nonzero()

@@ -24,7 +24,6 @@ class LaneFinder():
         self.real_mask = np.zeros((self.warped_size[1], self.warped_size[0], 3), dtype=np.uint8)
         self.left_line = LaneLineFinder(warped_size, x_pixels_per_meter, y_pixels_per_meter, kind='LEFT')
         self.right_line = LaneLineFinder(warped_size, self.x_pixels_per_meter, self.y_pixels_per_meter, kind='RIGHT')
-        self.found_both = False
         self.previous_lanes = []
         self.count = 0
 
@@ -161,6 +160,9 @@ class LaneFinder():
         plt.imshow(self.left_line.line)
         plt.imshow(self.right_line.line)
         plt.show()
+
+        # TODO: Add weighted between left line and image,
+
         #
         # if self.left_line.isGood and self.right_line.isGood:
         #     lanes = (self.left_line + self.right_line) & mask

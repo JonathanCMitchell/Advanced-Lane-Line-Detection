@@ -48,7 +48,7 @@ lf = LaneFinder(settings.ORIGINAL_SIZE, settings.UNWARPED_SIZE, camera_matrix, d
 
 
 # PROCESS MULTIPLE IMAGES
-for i in range(90, 92):
+for i in range(0, 20):
     print('COUNT: ', i)
     row = df.iloc[[i]]
     impath = df.iloc[[i]]['image_path'].values[0]

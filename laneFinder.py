@@ -155,11 +155,12 @@ class LaneFinder():
         # TODO: Check if lines are found, if not, use the previous lane lines
 
         self.left_line.find_lane_line(self.total_mask)
+        self.right_line.find_lane_line(self.total_mask)
         #
         # if self.left_line.isGood and self.right_line.isGood:
         #     lanes = (self.left_line + self.right_line) & mask
 
         # TODO: IMplement what happens when we find a lane or don't find a lane
         # TODO: Decision, do you want to check for lane lines and use previous ones here or inside LaneLineFinder?
-        lanes = self.left_line.find_lane_line(self.total_mask)
+        # lanes = self.left_line.find_lane_line(self.total_mask, kind = 'LEFT')
         # return lanes

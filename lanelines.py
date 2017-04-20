@@ -33,32 +33,39 @@ lf = LaneFinder(settings.ORIGINAL_SIZE, settings.UNWARPED_SIZE, camera_matrix, d
 # processed_img = lf.process_image(img)
 
 # Process single individual image
-# impath = './test_images/test3.jpg'
-# img = mpimg.imread(impath)
-# road_lines = lf.find_lane(img)
+impath = './test_images/test6.jpg'
+img = mpimg.imread(impath)
+lf.find_lane(img)
+# returned = lf.left_line.find_lane_line(lf.total_mask)
+# plt.imshow(returned)
+# plt.title('test5')
+# plt.show()
+
+
+
+
 # warped = lf.warp(img)
-# drawn_on = lf.add_weighted(warped, road_lines)
-# plt.imshow(drawn_on)
-# cv2.imwrite('./results/' + impath + 'test3' + '.jpg', cv2.cvtColor(drawn_on, cv2.COLOR_BGR2RGB))
+# plt.plot(returned)
+# plt.imshow(mask)
 # plt.show()
 #
 # # Process many images from pandas directory
-for i in range(90, 95):
-    print('COUNT: ', i)
-    row = df.iloc[[i]]
-    impath = df.iloc[[i]]['image_path'].values[0]
-    img = mpimg.imread(impath)
-
-    road_lines = lf.find_lane(img)
-    # TODO: Uncomment below for testing
-    # road_lines, weighted, mask  = lf.find_lane(img)
-    # cv2.imwrite('./results/' + str(i) + 'road_lines' + '.jpg', cv2.cvtColor(road_lines, cv2.COLOR_BGR2RGB))
-    # cv2.imwrite('./results/' + str(i) + 'weighted' + '.jpg', cv2.cvtColor(weighted, cv2.COLOR_BGR2RGB))
-    # cv2.imwrite('./results/' + str(i) + 'mask' + '.jpg', mask)
-    warped = lf.warp(img)
-    drawn_on = lf.add_weighted(warped, road_lines)
-    cv2.imwrite('./results/' + str(i) + 'drawn_on' + '.jpg', cv2.cvtColor(drawn_on, cv2.COLOR_BGR2RGB))
-
+# for i in range(90, 95):
+#     print('COUNT: ', i)
+#     row = df.iloc[[i]]
+#     impath = df.iloc[[i]]['image_path'].values[0]
+#     img = mpimg.imread(impath)
+#
+#     road_lines = lf.find_lane(img)
+#     # TODO: Uncomment below for testing
+#     # road_lines, weighted, mask  = lf.find_lane(img)
+#     # cv2.imwrite('./results/' + str(i) + 'road_lines' + '.jpg', cv2.cvtColor(road_lines, cv2.COLOR_BGR2RGB))
+#     # cv2.imwrite('./results/' + str(i) + 'weighted' + '.jpg', cv2.cvtColor(weighted, cv2.COLOR_BGR2RGB))
+#     # cv2.imwrite('./results/' + str(i) + 'mask' + '.jpg', mask)
+#     warped = lf.warp(img)
+#     drawn_on = lf.add_weighted(warped, road_lines)
+#     cv2.imwrite('./results/' + str(i) + 'drawn_on' + '.jpg', cv2.cvtColor(drawn_on, cv2.COLOR_BGR2RGB))
+#
 
 
 # for i in range(10):

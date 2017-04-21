@@ -66,7 +66,10 @@ class LaneFinder():
 
         warped_weighted = self.add_weighted(warped, both)
 
-        return warped_weighted
+        unwarp_both = self.unwarp(both)
+        original_weighted = self.add_weighted(image, unwarp_both)
+
+        return original_weighted
 
     def find_lane(self, image, distorted=True, reset = False):
         """

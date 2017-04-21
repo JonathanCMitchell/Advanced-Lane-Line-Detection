@@ -29,6 +29,7 @@ class LaneLineFinder():
         self.firstMargin = 50
         self.nextMargin = 15
         self.recent_coefficients = []
+        self.deviations = []# TODO: Remove later
 
     def find_lane_line(self, mask, reset = False):
 
@@ -85,11 +86,17 @@ class LaneLineFinder():
         self.next_coeffs = np.polyfit(y, x, 2)
 
         if len(self.recent_coefficients) > 0:
-            to_check = np.mean(np.array(self.recent_coefficients[-5:]), axis = 0)
+            to_check = np.mean(np.array(self.recent_coefficients[-25:]), axis = 0)
             deviation = np.abs(np.subtract(to_check, self.next_coeffs))
-            print('deviation: ', deviation, 'for: ', self.kind)
-            # TODO: Sum up the deviation and see where it should be
 
+            # Average the deviations
+            deviation = np.average(deviation)
+
+            if (deviation > 4):
+                # If deviation is too high use previous line
+                self.found = False
+            else:
+                self.found = True
 
     def get_line_pts(self, coeffs):
         ploty = np.linspace(0, self.img_height - 1, self.img_height)

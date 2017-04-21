@@ -59,7 +59,7 @@ lf = LaneFinder(settings.ORIGINAL_SIZE, settings.UNWARPED_SIZE, camera_matrix, d
  # MOVIEPY
 from moviepy.editor import VideoFileClip
 
-test_output = 'project_video_output.mp4'
+test_output = 'project_video_output2.mp4'
 clip1 = VideoFileClip("project_video.mp4")
 lf = LaneFinder(settings.ORIGINAL_SIZE, settings.UNWARPED_SIZE, camera_matrix, dist_coeffs,
                         M, x_pixels_per_meter, y_pixels_per_meter)

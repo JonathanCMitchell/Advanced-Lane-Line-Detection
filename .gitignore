@@ -4,7 +4,6 @@
 *.p
 /__pycache__/
 Image_Gen.ipynb
-/filtering/
 /test_images_viv/
 tracker.py
 Untitled.ipynb

@@ -28,6 +28,7 @@ class LaneLineFinder():
         self.out_img = np.zeros_like(self.line)
         self.firstMargin = 50
         self.nextMargin = 15
+        self.recent_coefficients = []
 
     def find_lane_line(self, mask, reset = False):
 
@@ -39,13 +40,19 @@ class LaneLineFinder():
 
 
         if not self.first:
+            # Append recent coefficients
+            self.recent_coefficients.append(self.next_coeffs)
+
             self.get_next_coeffs(mask, self.next_coeffs, self.kind)
+
+
             fitx, ploty = self.get_line_pts(self.next_coeffs)
 
         self.line = self.draw_lines(mask, fitx, ploty)
-        if self.kind == 'LEFT':
+
+        if self.kind == 'LEFT' and self.found:
             self.previous_line = self.line
-        if self.kind == 'RIGHT':
+        if self.kind == 'RIGHT' and self.found:
             self.previous_line = self.line
 
         if reset:
@@ -76,6 +83,13 @@ class LaneLineFinder():
         x = nonzerox[lane_inds]
         y = nonzeroy[lane_inds]
         self.next_coeffs = np.polyfit(y, x, 2)
+
+        if len(self.recent_coefficients) > 0:
+            to_check = np.mean(np.array(self.recent_coefficients[-5:]), axis = 0)
+            deviation = np.abs(np.subtract(to_check, self.next_coeffs))
+            print('deviation: ', deviation, 'for: ', self.kind)
+            # TODO: Sum up the deviation and see where it should be
+
 
     def get_line_pts(self, coeffs):
         ploty = np.linspace(0, self.img_height - 1, self.img_height)

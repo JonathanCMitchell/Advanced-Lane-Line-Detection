@@ -47,25 +47,26 @@ class LaneFinder():
         input: image: original image
         output: original image with lane lines overlayed
         """
-        lanes = self.find_lane(image)
-        #         print('inside process image lanes: ', lanes)
+        self.find_lane(image)
 
-        # Unwarp the lane lines
-        unwarped_lanes = self.unwarp(lanes)
+        warped = self.warp(image)
 
-        # Overlay the warped lanes
+        if not self.left_line.found:
+            left = self.left_line.previous_line
 
-        # option a) unwarp the image and then plot
-        # option b) overlay onto the actual image
-        weighted_warped = self.add_weighted(self.warp(image), lanes)
+        if not self.right_line.found:
+            right = self.right_line.previous_line
 
-        return weighted_warped
+        if self.left_line.found:
+            left = self.left_line.line
+        if self.right_line.found:
+            right = self.right_line.line
 
-    #         drawn_lanes_original = self.add_weighted(image, unwarped_lanes)
+        both = (left + right)
 
-    #         return drawn_lanes_original
+        warped_weighted = self.add_weighted(warped, both)
 
-
+        return warped_weighted
 
     def find_lane(self, image, distorted=True, reset = False):
         """
@@ -159,10 +160,12 @@ class LaneFinder():
 
         # plt.imshow(self.left_line.line)
 
-        weighted = self.add_weighted(warped, self.left_line.line)
-        plt.imshow(weighted)
-
-        plt.show()
+        # weighted = self.add_weighted(warped, self.left_line.line)
+        #
+        # if self.left_line.found and self.right_line.found:
+        #     weighted = self.add_weighted(warped, (self.left_line.line + self.right_line.line))
+        #
+        # return weighted
 
         # TODO: Add weighted between left line and image,
 

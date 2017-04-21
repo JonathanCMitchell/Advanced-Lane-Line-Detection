@@ -1,16 +1,8 @@
 from helpers import add_recent_centers
-from helpers import draw_window_box
 from helpers import moving_average_scale
-from helpers import draw_lines_weighted
 import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-import matplotlib.gridspec as gridspec
 import cv2
 import numpy as np
-import pickle as pickle
-import pandas as pd
-import glob
-import settings
 
 
 class LaneLineFinder():
@@ -27,44 +19,62 @@ class LaneLineFinder():
         self.first = True
         self.kind = kind
         self.line = np.zeros((img_size[1], img_size[0], 3), dtype = np.uint8)
+        self.previous_line = np.zeros((img_size[1], img_size[0], 3), dtype=np.uint8)
         self.line_mask = np.ones((img_size[1], img_size[0]), dtype=np.uint8) # create 2D line mask
         self.img_width = img_size[0]
         self.img_height = img_size[1]
-        self.first_coeffs = np.array([], dtype = np.float64)
+        self.initial_coeffs = np.array([], dtype = np.float64)
         self.next_coeffs = np.array([], dtype = np.float64)
         self.out_img = np.zeros_like(self.line)
         self.firstMargin = 50
-        self.nextMargin = 50
+        self.nextMargin = 15
 
-    def find_lane_line(self, mask):
+    def find_lane_line(self, mask, reset = False):
 
         if self.first:
-            self.get_first_coeffs(mask, self.kind)
-            fitx, ploty  = self.get_line_pts(self.first_coeffs)
+            self.get_initial_coeffs(mask, self.kind)
+            fitx, ploty = self.get_line_pts(self.initial_coeffs)
+            self.get_next_coeffs(mask, self.initial_coeffs, self.kind)
             self.first = False
 
-        # if we are not on the first image
+
         if not self.first:
-            self.get_next_coeffs(mask, self.kind)
+            self.get_next_coeffs(mask, self.next_coeffs, self.kind)
             fitx, ploty = self.get_line_pts(self.next_coeffs)
 
         self.line = self.draw_lines(mask, fitx, ploty)
+        if self.kind == 'LEFT':
+            self.previous_line = self.line
+        if self.kind == 'RIGHT':
+            self.previous_line = self.line
+
+        if reset:
+            self.reset_lane_line()
+
+        # TODO: Find a way to determine whether a line has been found or not
+
+    def reset_lane_line(self):
+        self.found = False
+        self.next_coeffs = np.zeros_like(self.next_coeffs)
+        self.line = np.zeros((img_size[1], img_size[0], 3), dtype = np.uint8)
+        self.first = True
 
 
-    def get_next_coeffs(self, mask, kind):
+    def get_next_coeffs(self, mask, coeffs, kind):
         nonzero = mask.nonzero()
         nonzeroy = np.array(nonzero[0])
         nonzerox = np.array(nonzero[1])
 
         # Should this be first coeffs or previous coeffs
-        lane_inds = ((nonzerox > self.first_coeffs[0] * (nonzeroy **2)
-                     + self.first_coeffs[1] * nonzeroy + self.first_coeffs[2] - self.nextMargin)) & \
-                    (nonzerox < self.first_coeffs[0] * (nonzeroy ** 2) + self.first_coeffs[1] * nonzeroy + self.first_coeffs[2] + self.nextMargin)
+        lane_inds = ((nonzerox > coeffs[0] * (nonzeroy **2)
+                     + coeffs[1] * nonzeroy + coeffs[2] - self.nextMargin)) & \
+                    (nonzerox < coeffs[0] * (nonzeroy ** 2) + coeffs[1] * nonzeroy + coeffs[2] + self.nextMargin)
 
+
+        # print('inside next: ', len(lane_inds))
         # TODO: If count > 1 should be self.prev_coeffs instead of self.first_coeffs
         x = nonzerox[lane_inds]
         y = nonzeroy[lane_inds]
-
         self.next_coeffs = np.polyfit(y, x, 2)
 
     def get_line_pts(self, coeffs):
@@ -83,8 +93,7 @@ class LaneLineFinder():
         return img
 
     def draw_lines(self, mask, fitx, ploty):
-
-        if self.kind == 'LEFT': color = (100, 200, 20)
+        if self.kind == 'LEFT': color = (20, 200, 100)
         if self.kind == 'RIGHT': color = (200, 100, 20)
 
         out_img = np.dstack((mask, mask, mask)) * 255
@@ -97,27 +106,18 @@ class LaneLineFinder():
         lane_points = np.array(list(zip(fitx, ploty)), np.int32)
         # draw the lane
         cv2.fillPoly(window_img, np.int_([line_pts]), (0, 20, 200))
-
-
-
         out_img = self.draw_pw(out_img, lane_points, color)
-
-
-        # cv2.fillPoly(out_img, [lane_points], (20, 230, 100))
-        # cv2.addWeighted(out_img, 1, window_img, 0.3, 0)
-
-        # plt.plot(fitx, ploty, color = 'green')
-        # plt.imshow(out_img)
-        # plt.xlim(0, 600)
-        # plt.title('show green line')
-        # plt.ylim(500, 0)
-        # plt.show()
         return out_img
 
-    def get_first_coeffs(self, mask, kind):
-        histogram = np.sum(mask[int(mask.shape[0]/2):,:], axis = 0)
+
+
+    def get_curvature(self):
+        pass
+
+    def get_initial_coeffs(self, mask, kind):
+        histogram = np.sum(mask[int(mask.shape[0] / 2):, :], axis=0)
         self.out_img = np.dstack((mask, mask, mask)) * 255
-        midpoint = np.int(histogram.shape[0]/2)
+        midpoint = np.int(histogram.shape[0] / 2)
 
         if kind == 'LEFT':
             x_base = np.argmax(histogram[:midpoint])
@@ -150,7 +150,7 @@ class LaneLineFinder():
                          & (nonzerox < win_x_high)).nonzero()[0]
 
             # lane_inds.append(good_inds)
-            print('length good inds: ', len(good_inds))
+            # print('length good inds: ', len(good_inds))
             # recenter onto the mean position if we found > minpix
             if len(good_inds) > minpix:
                 x_current = np.int(np.mean(nonzerox[good_inds]))
@@ -158,6 +158,8 @@ class LaneLineFinder():
             # If we get more than 5 good indices then we append
             if len(good_inds) > 5:
                 lane_inds.append(good_inds)
+
+            print('inside first: ', len(good_inds))
 
         # Concatenate the arrays of indices
         lane_inds = np.concatenate(lane_inds)
@@ -167,21 +169,4 @@ class LaneLineFinder():
         y = nonzeroy[lane_inds]
 
         # Fit a second order polynomial
-        self.first_coeffs = np.polyfit(y, x, 2)
-        #
-        # # Visualize
-        # ploty = np.linspace(0, self.img_height - 1, self.img_height)
-        # first_fitx = self.first_coeffs[0] * ploty ** 2 + self.first_coeffs[1] * ploty + self.first_coeffs[2]
-        # self.out_img[nonzeroy[lane_inds], nonzerox[lane_inds]] = [255, 0, 0]
-        # # plt.imshow(self.out_img)
-        # # plt.plot(first_fitx, ploty, color='blue')
-        # # plt.show()
-        #
-        # return first_fitx
-
-        # TODO: use previous line points as an anchor for next line x_base
-        # TODO: use previous line points as an anchor for next x_current
-
-
-    def get_curvature(self):
-        pass
+        self.initial_coeffs = np.polyfit(y, x, 2)

@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import settings
 from laneLineFinder import LaneLineFinder
+import math
 import matplotlib.pyplot as plt
 
 class LaneFinder():
@@ -67,6 +68,13 @@ class LaneFinder():
             curve_right = self.right_line.curvature
 
         # TODO: add conditional: if curve.right and curve.left then pick curve.left else pick curve.right
+        if curve_left:
+            curve = curve_left
+        else:
+            curve = curve_right
+
+        print('inside laneFinder curvature is : ', curve)
+
 
         both = (left + right)
 
@@ -75,7 +83,16 @@ class LaneFinder():
         unwarp_both = self.unwarp(both)
         original_weighted = self.add_weighted(image, unwarp_both)
 
+        original_weighted = self.add_curvature(original_weighted, curve)
+
         return original_weighted
+
+    def add_curvature(self, img, curve):
+        # TODO: Change ceil to round
+
+        cv2.putText(img, 'Radius of curvature = ' + str(curve) + '(m)', (50, 50),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+        return img
 
     def find_lane(self, image, distorted=True, reset = False):
         """

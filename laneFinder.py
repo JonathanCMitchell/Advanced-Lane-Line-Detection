@@ -67,14 +67,10 @@ class LaneFinder():
             right = self.right_line.line
             curve_right = self.right_line.curvature
 
-        # TODO: add conditional: if curve.right and curve.left then pick curve.left else pick curve.right
         if curve_left:
             curve = curve_left
         else:
             curve = curve_right
-
-        print('inside laneFinder curvature is : ', curve)
-
 
         both = (left + right)
 

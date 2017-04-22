@@ -53,14 +53,20 @@ class LaneFinder():
 
         if not self.left_line.found:
             left = self.left_line.previous_line
+            curve_right = self.left_line.previous_line.curvature
 
         if not self.right_line.found:
             right = self.right_line.previous_line
+            curve_right = self.right_line.previous_line.curvature
 
         if self.left_line.found:
             left = self.left_line.line
+            curve_left = self.left_line.curvature
         if self.right_line.found:
             right = self.right_line.line
+            curve_right = self.right_line.curvature
+
+        # TODO: add conditional: if curve.right and curve.left then pick curve.left else pick curve.right
 
         both = (left + right)
 

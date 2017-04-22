@@ -48,23 +48,23 @@ lf = LaneFinder(settings.ORIGINAL_SIZE, settings.UNWARPED_SIZE, camera_matrix, d
 
 
 # PROCESS MULTIPLE IMAGES
-# for i in range(950, 1005):
-#     print('COUNT: ', i)
-#     row = df.iloc[[i]]
-#     impath = df.iloc[[i]]['image_path'].values[0]
-#     img = mpimg.imread(impath)
-#     image = lf.process_image(img)
-#     cv2.imwrite('./results/' + str(i) + 'drawn_on' + '.jpg', cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+for i in range(0, 20):
+    print('COUNT: ', i)
+    row = df.iloc[[i]]
+    impath = df.iloc[[i]]['image_path'].values[0]
+    img = mpimg.imread(impath)
+    image = lf.process_image(img)
+    cv2.imwrite('./results/' + str(i) + 'drawn_on' + '.jpg', cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
  # MOVIEPY
 from moviepy.editor import VideoFileClip
 
-test_output = 'project_video_output2.mp4'
-clip1 = VideoFileClip("project_video.mp4")
-lf = LaneFinder(settings.ORIGINAL_SIZE, settings.UNWARPED_SIZE, camera_matrix, dist_coeffs,
-                        M, x_pixels_per_meter, y_pixels_per_meter)
-white_clip = clip1.fl_image(lf.process_image) #NOTE: this function expects color images!!
-white_clip.write_videofile(test_output, audio=False)
+# test_output = 'project_video_output3.mp4'
+# clip1 = VideoFileClip("project_video.mp4")
+# lf = LaneFinder(settings.ORIGINAL_SIZE, settings.UNWARPED_SIZE, camera_matrix, dist_coeffs,
+#                         M, x_pixels_per_meter, y_pixels_per_meter)
+# white_clip = clip1.fl_image(lf.process_image) #NOTE: this function expects color images!!
+# white_clip.write_videofile(test_output, audio=False)
 
 # warped = lf.warp(img)
 # plt.plot(returned)

@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import cv2
 import numpy as np
 
+# TODO: Add averaging method to average / smooth the most recent polynomial coefficients
 
 class LaneLineFinder():
     """
@@ -30,6 +31,7 @@ class LaneLineFinder():
         self.nextMargin = 15
         self.recent_coefficients = []
         self.deviations = []# TODO: Remove later
+        self.x = None
 
     def find_lane_line(self, mask, reset = False):
 
@@ -50,6 +52,7 @@ class LaneLineFinder():
             fitx, ploty = self.get_line_pts(self.next_coeffs)
 
         self.line = self.draw_lines(mask, fitx, ploty)
+        self.curvature = self.get_curvature(fitx, ploty)
 
         if self.kind == 'LEFT' and self.found:
             self.previous_line = self.line
@@ -81,8 +84,10 @@ class LaneLineFinder():
 
         # print('inside next: ', len(lane_inds))
         # TODO: If count > 1 should be self.prev_coeffs instead of self.first_coeffs
+        # TODO: Add self.x = x
         x = nonzerox[lane_inds]
         y = nonzeroy[lane_inds]
+        self.x = x
         self.next_coeffs = np.polyfit(y, x, 2)
 
         if len(self.recent_coefficients) > 0:
@@ -131,10 +136,6 @@ class LaneLineFinder():
         return out_img
 
 
-
-    def get_curvature(self):
-        pass
-
     def get_initial_coeffs(self, mask, kind):
         histogram = np.sum(mask[int(mask.shape[0] / 2):, :], axis=0)
         self.out_img = np.dstack((mask, mask, mask)) * 255
@@ -180,7 +181,7 @@ class LaneLineFinder():
             if len(good_inds) > 5:
                 lane_inds.append(good_inds)
 
-            print('inside first: ', len(good_inds))
+            # print('inside first: ', len(good_inds))
 
         # Concatenate the arrays of indices
         lane_inds = np.concatenate(lane_inds)
@@ -189,5 +190,23 @@ class LaneLineFinder():
         x = nonzerox[lane_inds]
         y = nonzeroy[lane_inds]
 
+        # TODO: Add self.x
+        self.x = x
         # Fit a second order polynomial
         self.initial_coeffs = np.polyfit(y, x, 2)
+
+    def get_curvature(self, fitx, ploty):
+        """
+        Calculates the curvature using r = (a + (dy/dx)^2]^3/2 / |d^2y/dx^2|
+        adds curvature to self.curvature, 
+        :return: curvature appended as self.curvature
+        """
+        ym_per_pix = 1 / self.y_pixels_per_meter
+        xm_per_pix = 1 / self.x_pixels_per_meter
+
+        y_eval = np.max(ploty)
+        fit_cr = np.polyfit(ploty * ym_per_pix, fitx * xm_per_pix, 2)
+
+        self.curvature =  ((1 + (2*fit_cr[0]*y_eval*ym_per_pix + fit_cr[1])**2)**1.5) / np.absolute(2*fit_cr[0])
+        print('self.curvature: ', self.curvature, 'for: ', self.kind)
+

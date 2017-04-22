@@ -33,3 +33,8 @@ To help the reviewer examine your work, please save examples of the output from 
 The `challenge_video.mp4` video is an extra (and optional) challenge for you if you want to test your pipeline under somewhat trickier conditions.  The `harder_challenge.mp4` video is another optional challenge and is brutal!
 
 If you're feeling ambitious (again, totally optional though), don't stop there!  We encourage you to go out and take video of your own, calibrate your camera and show us how you would implement this project from scratch!
+
+
+## Process:
+This program was tough. Primarily because I did not know a lot of the techniques we had to use before doing it. I started
+by trying to put all my code inside a Jupyter notebook, but that did not work out so well. I found that using a class was really nice,

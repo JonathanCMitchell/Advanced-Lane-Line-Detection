@@ -39,7 +39,9 @@ If you're feeling ambitious (again, totally optional though), don't stop there! 
 This program was tough. Primarily because I did not know a lot of the techniques we had to use before doing it. I started
 by trying to put all my code inside a Jupyter notebook, but that did not work out so well. I found that using a class was really nice,
 
-### This project has three stages:
+
+
+### We will break the project down into three stages:
 ### Stage 1: Camera Distortion
 * Our video stream was captured using a monocular camera. As such, we must correct the distortion that may occur. To do this, I used openCV's `drawChessboardCoenrs` and
 `findChessboardCorners` functions. I then created two lists, `object_points` and `image_points`. Object points describe's where each pixel in the image exists in a real world representation (X, Y, Z).
@@ -60,13 +62,16 @@ because later on in stage 3 we will recall and use them in `cv2.undistort()`.
 * Apply canny edge detection on the Lightness layer of the HLS image. (This gives us a better representation of the lane lines).
 * Apply the Hough Transform to obtain coordinates for lines that are considered to be straight
 #### Finding the vanishing point:
-* The vanishing point in an image is the point where it looks like the picture can go on forever. If you recall photos of a sunset of a horizon where they appear to extend forever, that's the point we are looking for.
+The vanishing point in an image is the point where it looks like the picture can go on forever. If you recall photos of a sunset of a horizon where they appear to extend forever, that's the point we are looking for.
 * a [vanishing](https://en.wikipedia.org/wiki/Vanishing_point) point is a point in the image plane where the projections of a set of parallel lines in space intersect.
 * After we applied the Hough Transform we get coordinate sets inside a list
 * The vanishing point is the the <strong>intersection</strong> of all the lines built from the coordinates inside that list
 * It is the point with minimal squared distance from the lines in the hough list
 * The total squared distance
 # TODO: Insert eqn1 from /eqn/eqn1.png and label it eqn1
+### Architecture Design:
+![architecture design](https://github.com/JonathanCMitchell/)
+
 * where: I is the cost function, <strong>ni</strong> is the line normal to the hough lines and <strong>pi</strong> are the points on the hough lines
 * Then we minimize I w.r.t vp.
 # TODO: Insert eqn2 from /eqn/eqn2.png and label is eqn 2
@@ -90,11 +95,14 @@ To find the source points using the vanishing point `vp`, we had to be clever.
 #### Finding the distance
 * We use moments in order to find the distance between two lane lines in our warped images.
 * Lane lines are ~12 feet apart in the real world. We can use this info to find out how many pixels in our image equals 1 meter.
-* We find the area between the lane lines using the zeroth moment, then we divide the first moment by the zeroth moment to get a centroid for both the right and left lane lines
+* We find the area between the lane lines using the zeroth moment, then we divide the first moment by the zeroth moment to get a centroid, (the center point) for both the right and left lane lines in the x-dimension.
 * Now we find the minimum distance between the two centroids and define that to be our lane width. Then convert the lane width from feet to meters and now we have our pixels per meter in x.
-* To find the pixels per meter in y, we normalize our homography matrix and extract the x and y components, then we multiply our x_pixels_per_meter by the projection of our x-norm in the y-direction. The projection provides the scale from x space to y space.
-### x_pixel_per_meter:  53.511326971489076
-### y_pixel_per_meter:  37.0398121547
+In our warped image there is no depth, it is planar. Therefore the Z in our homography matrix is 0. With that information, now all we have to do is determine the y-component from the x-component. 
+We do this by scaling the x-dimension slot in the homography matrix by the y-dimension slot. Then we multiply that scaled value by our x_pixels_per_meter to obtain the y_pixels_per_meter. 
+* x_pixel_per_meter:  53.511326971489076
+* y_pixel_per_meter:  37.0398121547
+### Insert image: /filtering/lane_lines_center_markings.png
+You can see the centroids as the marked points in this image
 * Then we save everything to a pickle file and move on to our lane line identification stage.
 * Code for this stage can be seen inside Perspective_Transform.ipynb
 

@@ -51,16 +51,20 @@ class LaneLineFinder():
 
             fitx, ploty = self.get_line_pts(self.next_coeffs)
 
-        self.get_curvature(fitx, ploty)
-        self.line = self.draw_lines(mask, fitx, ploty)
 
         if self.kind == 'LEFT' and self.found:
             self.previous_line = self.line
+            self.previous_curvature = self.get_curvature(fitx, ploty)
         if self.kind == 'RIGHT' and self.found:
             self.previous_line = self.line
+            self.previous_curvature = self.get_curvature(fitx, ploty)
 
         if reset:
             self.reset_lane_line()
+
+        self.line = self.draw_lines(mask, fitx, ploty)
+        # Find new curvature or use previous curvature
+        self.curvature = self.get_curvature(fitx, ploty) or self.previous_curvature
 
         # TODO: Find a way to determine whether a line has been found or not
 
@@ -204,6 +208,7 @@ class LaneLineFinder():
         fit_cr = np.polyfit(ploty * ym_per_pix, fitx * xm_per_pix, 2)
 
 
-        self.curvature =  ((1 + (2*fit_cr[0]*y_eval*ym_per_pix + fit_cr[1])**2)**1.5) / np.absolute(2*fit_cr[0])
-        print('self.curvature: ', self.curvature, 'for: ', self.kind)
+        curvature =  ((1 + (2*fit_cr[0]*y_eval*ym_per_pix + fit_cr[1])**2)**1.5) / np.absolute(2*fit_cr[0])
+        return curvature
+        # print('self.curvature: ', self.curvature, 'for: ', self.kind)
 

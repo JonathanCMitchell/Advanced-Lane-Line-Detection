@@ -54,11 +54,11 @@ class LaneFinder():
 
         if not self.left_line.found:
             left = self.left_line.previous_line
-            curve_left = self.left_line.curvature
+            curve_right = self.left_line.previous_line.curvature
 
         if not self.right_line.found:
-            right = self.right_line.previous_line # should be an instance
-            curve_right = self.right_line.curvature
+            right = self.right_line.previous_line
+            curve_right = self.right_line.previous_line.curvature
 
         if self.left_line.found:
             left = self.left_line.line
@@ -71,8 +71,6 @@ class LaneFinder():
             curve = curve_left
         else:
             curve = curve_right
-
-        # TODO: Can I make this: curve = curve_left or curve_right
 
         both = (left + right)
 
@@ -120,8 +118,8 @@ class LaneFinder():
 
         # Get structuring element for morph transforms
         # note: Select structuring element to be large enough so that it won't fit inside the objects to be removed
-        large_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (31, 31))
-        small_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
+        large_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (29, 29))
+        small_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (9, 9))
 
         # The road is dark, so extract bright regions out of the image
         # If L in HLS is greater than 190 then it is bright
@@ -142,7 +140,8 @@ class LaneFinder():
         # perform Dilation morphology for enhancement on larger features
         roi_mask = cv2.dilate(roi_mask, large_kernel)
 
-        self.roi_mask[:, :, 0] = (self.left_line.line_mask | self.right_line.line_mask) & roi_mask
+        # self.roi_mask[:, :, 0] = (self.left_line.line_mask | self.right_line.line_mask) & roi_mask
+        self.roi_mask[:, :, 0] = np.ones((self.warped_size[1], self.warped_size[0]), dtype = np.uint8) & roi_mask
         self.roi_mask[:, :, 1] = self.roi_mask[:, :, 0]
         self.roi_mask[:, :, 2] = self.roi_mask[:, :, 0]
 
@@ -161,43 +160,12 @@ class LaneFinder():
                                                    -1.5)
 
         diff_mask = self.mask * self.roi_mask
-        small_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+        # small_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+        small_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 2))
 
         # grab any values that are nonzero
         self.total_mask = np.any(diff_mask, axis=2).astype(np.uint8)
         # erosion on total_mask to reduce noise
         self.total_mask = cv2.morphologyEx(self.total_mask, cv2.MORPH_ERODE, small_ellipse)
-
-        left_mask = self.total_mask
-        # right_mask = self.total_mask
-        # if self.right_line.found:
-        #     # left mask is NOT the right line mask and not the right line's other mask, this mask is binary
-        #     left_mask = self.total_mask & np.logical_not(self.right_line.line_mask)
-        # if self.left_line.found:
-        # right_mask = self.total_mask & np.logical_note(self.left_line.line_mask)
-
-
-        # TODO: Check if lines are found, if not, use the previous lane lines
-
         self.left_line.find_lane_line(self.total_mask)
         self.right_line.find_lane_line(self.total_mask)
-
-        # plt.imshow(self.left_line.line)
-
-        # weighted = self.add_weighted(warped, self.left_line.line)
-        #
-        # if self.left_line.found and self.right_line.found:
-        #     weighted = self.add_weighted(warped, (self.left_line.line + self.right_line.line))
-        #
-        # return weighted
-
-        # TODO: Add weighted between left line and image,
-
-        #
-        # if self.left_line.isGood and self.right_line.isGood:
-        #     lanes = (self.left_line + self.right_line) & mask
-
-        # TODO: IMplement what happens when we find a lane or don't find a lane
-        # TODO: Decision, do you want to check for lane lines and use previous ones here or inside LaneLineFinder?
-        # lanes = self.left_line.find_lane_line(self.total_mask, kind = 'LEFT')
-        # return lanes

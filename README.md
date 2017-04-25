@@ -2,15 +2,7 @@
 [![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 
 
-In this project, your goal is to write a software pipeline to identify the lane boundaries in a video, but the main output or product we want you to create is a detailed writeup of the project.  Check out the [writeup template](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md) for this project and use it as a starting point for creating your own writeup.  
-
-Creating a great writeup:
----
-A great writeup should include the rubric points as well as your description of how you addressed each point.  You should include a detailed description of the code used in each step (with line-number references and code snippets where necessary), and links to other supporting documents or external references.  You should include images in your writeup to demonstrate how your code works with examples.  
-
-All that said, please be concise!  We're not looking for you to write a book here, just a brief description of how you passed each rubric point, and references to the relevant code :). 
-
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup.
+Our goal is to write a software pipeline to identify the lane boundaries in a video, but the main output or product we want to create is a detailed writeup of the project.  Check out the [writeup template](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md) for this project and use it as a starting point for creating your own writeup.  
 
 The Project
 ---
@@ -26,18 +18,19 @@ The goals / steps of this project are the following:
 * Warp the detected lane boundaries back onto the original image.
 * Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
 
-The images for camera calibration are stored in the folder called `camera_cal`.  The images in `test_images` are for testing your pipeline on single frames.  If you want to extract more test images from the videos, you can simply use an image writing method like `cv2.imwrite()`, i.e., you can read the video in frame by frame as usual, and for frames you want to save for later you can write to an image file.  
-
-To help the reviewer examine your work, please save examples of the output from each stage of your pipeline in the folder called `ouput_images`, and include a description in your writeup for the project of what each image shows.    The video called `project_video.mp4` is the video your pipeline should work well on.  
-
-The `challenge_video.mp4` video is an extra (and optional) challenge for you if you want to test your pipeline under somewhat trickier conditions.  The `harder_challenge.mp4` video is another optional challenge and is brutal!
-
-If you're feeling ambitious (again, totally optional though), don't stop there!  We encourage you to go out and take video of your own, calibrate your camera and show us how you would implement this project from scratch!
-
 
 ## Process:
 This program was tough. Primarily because I did not know a lot of the techniques we had to use before doing it. I started
 by trying to put all my code inside a Jupyter notebook, but that did not work out so well. I found that using a class was really nice,
+
+## Important files:
+* LaneFinder.py
+* LaneLinderFinder.py
+* lanelines.py
+* settings.py
+* helpers.py
+
+## output images: are inside /filtering/
 
 
 
@@ -178,8 +171,27 @@ We do this by scaling the x-dimension slot in the homography matrix by the y-dim
 * Then we unwarp the image and return it
 * AND THAT's IT!
 
+### Video of result
+
+<a href="http://www.youtube.com/embed/6qCmt0zfq-k
+" target="_blank"><img src="http://img.youtube.com/vi/6qCmt0zfq-k/0.jpg" 
+alt="Watch Video Here" width="480" height="180" border="10" /></a>
 
 
 ## Reflection
 * I should have created a reset option, so that if the detected line deviates too far from the average we will do a complete reset and then look for the next line as if it was the first line.
 This would help solve the challenge video.
+
+
+#### Twitter: [@jonathancmitch](https://twitter.com/jonathancmitch)
+#### Linkedin: [https://www.linkedin.com/in/jonathancmitchell](https://twitter.com/jonathancmitch)
+#### Github: [github.com/jonathancmitchell](github.com/jonathancmitchell)
+#### Medium: [https://medium.com/@jmitchell1991](https://medium.com/@jmitchell1991)
+
+#### Tools used
+* [Numpy](http://www.numpy.org/)
+* [OpenCV3](http://pandas.pydata.org/)
+* [Python](https://www.python.org/)
+* [Pandas](http://pandas.pydata.org/)
+* [Matplotlib](http://matplotlib.org/api/pyplot_api.html)
+* [SciKit-Learn](http://scikit-learn.org/)

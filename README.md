@@ -85,7 +85,7 @@ To find the source points using the vanishing point `vp`, we had to be clever.
 * The source points define the section of the image we will use for our warping transformation
 * The destination points are the where the source points will ultimately end up after we apply our warp. (pixels will be mapped from source points to destination points)
 * ![vanishing_pt](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/img/Vanishing_point.png)
-* Here you can see the vanishing point as defined by the blue triangle
+* Here you can see the vanishing point (blue triangle)
 * ![perspective_transform](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/img/Trapezoid_for_perspective_transform.png)
 * Here you can see the Trapezoid mask we will be using for our perspective transform. The source points are marked with the + and ^ dots.
 
@@ -131,7 +131,7 @@ We do this by scaling the x-dimension slot in the homography matrix by the y-dim
 * Here is the `hls` saturation filter
 * ![hls_saturation_filter](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/hsl_saturation_luminance_filtering.png)
 
-* Here is the region of interest filter (after we NOT the nature)
+* Here is the region of interest filter (after we NOT the nature part)
 * ![roi_mask](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/region_of_interest_mask.png)
 
 * Then we perform adaptive thresholding (LaneFinder.py lines 160-162)

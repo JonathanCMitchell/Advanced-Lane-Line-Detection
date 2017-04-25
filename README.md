@@ -98,7 +98,7 @@ In our warped image there is no depth, it is planar. Therefore the Z in our homo
 We do this by scaling the x-dimension slot in the homography matrix by the y-dimension slot. Then we multiply that scaled value by our x_pixels_per_meter to obtain the y_pixels_per_meter. 
 * x_pixel_per_meter:  53.511326971489076
 * y_pixel_per_meter:  37.0398121547
-![lane_lines_center_markings](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/img/lane_lines_with_centroid_markings.png)
+* ![lane_lines_center_markings](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/img/lane_lines_with_centroid_markings.png)
 * You can see the centroids as the marked points in this image
 * Then we save everything to a pickle file and move on to our lane line identification stage.
 * Code for this stage can be seen inside Perspective_Transform.ipynb
@@ -108,7 +108,7 @@ We do this by scaling the x-dimension slot in the homography matrix by the y-dim
 #### Preprocessing:
 * First we undistort the image
 * Then we warp the image into an aerial view
-* [warped](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/test_road.png)
+* ![warped](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/test_road.png)
 
 #### Filtering: (in LaneFinder.py lines 114 to 143)
 * We first create two copies of our warped image, an `hls` and a `lab` colorspace copy. 
@@ -126,21 +126,21 @@ We do this by scaling the x-dimension slot in the homography matrix by the y-dim
 * Tophat the `lab`, `hls`, and the `yellow` filter. Tophat reduces noise from tiny pixels. Tophat = opening + dilation. Read about it [here](http://docs.opencv.org/3.2.0/d3/dbe/tutorial_opening_closing_hats.html)
 * See the filters here:
 * This is what the `hls` luminance filter picked up:
-![hls_filter](https://github.com/JonathanCMitchell/Avanced-Lane-Line-Detection/blob/feature/histogram/filtering/hls_luminance_filtering_difference.png)
+* ![hls_filter](https://github.com/JonathanCMitchell/Avanced-Lane-Line-Detection/blob/feature/histogram/filtering/hls_luminance_filtering_difference.png)
 
 * Here is the `hls` saturation filter
-![hls_saturation_filter](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/hsl_saturation_luminance_filtering.png)
+* ![hls_saturation_filter](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/hsl_saturation_luminance_filtering.png)
 
 * Here is the region of interest filter (after we NOT the nature)
-![roi_mask](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/region_of_interest_mask.png)
+* ![roi_mask](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/region_of_interest_mask.png)
 
 * Then we perform adaptive thresholding (LaneFinder.py lines 160-162)
 * Then we combine this mask with the roi_mask to create a difference mask (shown below)
-* [difference_mask](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/difference_mask.png)
+* ![difference_mask](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/difference_mask.png)
 
 * Then we perform erosion on the difference mask to obtain the total mask. 
 * I tried using 5x5 kernels at first for this erosion step. Ellipses were the best kernel shape because they will erode isolated pixels, but when the kernel size was (5, 5) it was too large and it started to erode the pixels that correspond to dashes inside the lane lines. So (3, 3) was the best option, even though occasionally it may remove pixels in between the lane lines.
-* [total_maskl](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/total_mask_erode_kernel_3.png)
+* ![total_maskl](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/total_mask_erode_kernel_3.png)
 * Now we pass this binary mask into our LaneLineFinder instance.
 #### Step 2: Line detection
 

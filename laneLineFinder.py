@@ -36,6 +36,8 @@ class LaneLineFinder():
 
         if self.first:
             self.get_initial_coeffs(mask, self.kind)
+            # TODO: Added below append initial coefficients to recents
+            self.recent_coefficients.append(self.initial_coeffs)
             fitx, ploty = self.get_line_pts(self.initial_coeffs)
             self.get_next_coeffs(mask, self.initial_coeffs, self.kind)
             self.first = False
@@ -103,11 +105,30 @@ class LaneLineFinder():
 
 
     def get_line_pts(self, coeffs):
+        """
+        input: coeffs, the coefficients that are the result of computing the polyfit
+        for the nonzerox and the nonzeroy indices inside get_next_coeffs and get_initial_coeffs
+        coeffs are the coefficients a, b, and c in the eqn f(x) = ay^2 + by + c
+        Here we average the recent coefficients by our smoothing factor so we can have smoother lanes
+        :param coeffs: 
+        :return: we return the x and y coordinates for the lane lines
+        """
+        # averages recent coefficients by smoothing factor before getting line points
+        if len(self.recent_coefficients) > self.smooth_factor:
+            coeffs = np.mean(self.recent_coefficients[self.smooth_factor:], axis = 0)
         ploty = np.linspace(0, self.img_height - 1, self.img_height)
         fitx = coeffs[0] * ploty ** 2 + coeffs[1] * ploty + coeffs[2]
         return fitx, ploty
 
     def draw_pw(self, img, pts, color):
+        """
+        Here we loop through out pts which have [x, y] coordinates and draw lines for those coordinates.
+        We are drawing many small tiny lines which appear to be curved because there are so many of them.
+        :param img: an image to draw on as RGB warped shape (600, 500, 3) 
+        :param pts: the lane points list as [x, y] values
+        :param color: color as rgb (0, 255)
+        :return: an image with lines drawn on it corresponding to the points given in pts
+        """
         pts = np.int_(pts)
         for i in range(len(pts) - 1):
             x1 = pts[i][0]
@@ -118,6 +139,15 @@ class LaneLineFinder():
         return img
 
     def draw_lines(self, mask, fitx, ploty):
+        """
+        Here we have two features 1) to visualize the windowing process
+        2) to drawn the lane lines
+        1) is not used in our final result but it is useful for visualization purposes
+        :param mask: the input mask as warped shape (600, 500) binary image 
+        :param fitx: x-coordinate points list corresponding to lane lines
+        :param ploty: y-coordinate points list
+        :return: out_img which is an output image with a single lane line (left or right) overlay
+        """
         if self.kind == 'LEFT': color = (20, 200, 100)
         if self.kind == 'RIGHT': color = (200, 100, 20)
 
@@ -127,13 +157,15 @@ class LaneLineFinder():
         out_img = np.dstack((mask, mask, mask)) * 255
         window_img = np.zeros_like(out_img)
 
-        line_window1 = np.array([np.transpose(np.vstack([fitx - self.nextMargin, ploty]))])
-        line_window2 = np.array([np.flipud(np.transpose(np.vstack([fitx + self.nextMargin, ploty])))])
-        line_pts = np.hstack((line_window1, line_window2))
+        # ===== UNCOMMENT below TO VIEW WINDOWING ====
+        # line_window1 = np.array([np.transpose(np.vstack([fitx - self.nextMargin, ploty]))])
+        # line_window2 = np.array([np.flipud(np.transpose(np.vstack([fitx + self.nextMargin, ploty])))])
+        # line_pts = np.hstack((line_window1, line_window2))
+        # cv2.fillPoly(window_img, np.int_([line_pts]), (0, 20, 200))
+        # ===== UNCOMMENT below TO VIEW WINDOWING ====
 
+        # draw lane line
         lane_points = np.array(list(zip(fitx, ploty)), np.int32)
-        # draw the lane
-        cv2.fillPoly(window_img, np.int_([line_pts]), (0, 20, 200))
         out_img = self.draw_pw(out_img, lane_points, color)
         return out_img
 
@@ -177,7 +209,7 @@ class LaneLineFinder():
             # print('length good inds: ', len(good_inds))
             # recenter onto the mean position if we found > minpix
             if len(good_inds) > minpix:
-                x_current = np.int(np.mean(nonzerox[good_inds]))
+                x_current = np.int(np.mean(nonzerox[good_inds], axis = 0))
 
             # If we get more than 5 good indices then we append
             if len(good_inds) > 5:

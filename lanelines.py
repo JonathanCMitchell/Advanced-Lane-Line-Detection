@@ -1,6 +1,9 @@
 import pickle as pickle
 import pandas as pd
 import settings
+import cv2
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 from laneFinder import LaneFinder
 data = pickle.load( open( "camera_calibration.p", "rb" ) )
 camera_matrix = data['mtx']
@@ -24,7 +27,8 @@ lf = LaneFinder(settings.ORIGINAL_SIZE, settings.UNWARPED_SIZE, camera_matrix, d
 #     row = df.iloc[[i]]
 #     impath = df.iloc[[i]]['image_path'].values[0]
 #     img = mpimg.imread(impath)
-#     image = lf.process_image(img)
+#     process_image = lf.process_image(img)
+#     image = process_image
 #     cv2.imwrite('./results/' + str(i) + 'drawn_on' + '.jpg', cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
 #  # MOVIEPY project video

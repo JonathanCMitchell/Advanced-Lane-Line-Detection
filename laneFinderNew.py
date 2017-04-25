@@ -120,13 +120,14 @@ class LaneFinder():
 
         # Get structuring element for morph transforms
         # note: Select structuring element to be large enough so that it won't fit inside the objects to be removed
-        large_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (29, 29))
-        small_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (9, 9))
+        large_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (31, 31))
+        small_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
 
         # The road is dark, so extract bright regions out of the image
         # If L in HLS is greater than 190 then it is bright
         # Also filter out low saturation < 50
-        hls_filter = cv2.inRange(img_hls, (0, 0, 50), (30, 192, 255))
+        hls_filter = cv2.inRange(img_hls, (0, 0, 50), (30, 190, 255))
+
 
         yellow = hls_filter & (img_lab[:, :, 2].astype(np.uint8) > 127)
 
@@ -162,8 +163,7 @@ class LaneFinder():
                                                    -1.5)
 
         diff_mask = self.mask * self.roi_mask
-        # small_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-        small_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 2))
+        small_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
 
         # grab any values that are nonzero
         self.total_mask = np.any(diff_mask, axis=2).astype(np.uint8)

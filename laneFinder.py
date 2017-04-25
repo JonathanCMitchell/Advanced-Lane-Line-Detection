@@ -3,6 +3,7 @@ import numpy as np
 import settings
 from LaneLineFinderOld import LaneLineFinder
 import math
+import matplotlib.pyplot as plt
 
 class LaneFinder():
     def __init__(self,
@@ -27,6 +28,8 @@ class LaneFinder():
         self.previous_lanes = []
         self.count = 0
         self.center_diff = None
+        self.previous_inner_lane = np.zeros((img_size[1], img_size[0], 3), dtype = np.uint8)
+
 
     def warp(self, img):
         return cv2.warpPerspective(img, self.transform_matrix, self.warped_size,
@@ -71,7 +74,18 @@ class LaneFinder():
 
 
         both = (left + right)
+        # TODO: Redo how we define both
+        from scipy.stats import describe
+        inner = self.get_inner_lane()
+        inner_good = np.any(inner[inner > 1])
 
+        if not inner_good:
+            inner = self.previous_inner_lane
+
+        lanes = left + right + inner
+
+        plt.imshow(lanes)
+        plt.show()
         # FIND CENTER
         if self.left_line.found and self.right_line.found:
             camera_center = (self.left_line.last_fitx + self.right_line.last_fitx)/2
@@ -81,10 +95,10 @@ class LaneFinder():
         if self.center_diff <= 0:
             side_pos = 'right'
 
-        warped_weighted = self.add_weighted(warped, both)
+        warped_weighted = self.add_weighted(warped, lanes)
 
-        unwarp_both = self.unwarp(both)
-        original_weighted = self.add_weighted(image, unwarp_both)
+        unwarp_lanes = self.unwarp(lanes)
+        original_weighted = self.add_weighted(image, unwarp_lanes)
 
         original_weighted = self.add_curvature_and_center(original_weighted, curve, self.center_diff, side_pos)
 
@@ -99,6 +113,28 @@ class LaneFinder():
         cv2.putText(img, 'Vehicle is: ' + str(center_diff) + 'm ' + str(side_pos) + 'of center', (50, 100),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
         return img
+
+
+    def get_inner_lane(self):
+        if self.left_line.found and self.right_line.found:
+            # self.previous_middle =
+            left_fitx = self.left_line.fitx
+            ploty = self.left_line.ploty
+
+            right_fitx = self.right_line.fitx
+            inner_lane = np.array(list(zip(
+                np.concatenate((left_fitx, \
+                                right_fitx[::-1]), axis = 0), \
+                np.concatenate((ploty, ploty[::-1]), axis = 0))), np.int32)
+
+            img = np.zeros((self.warped_size[1], self.warped_size[0], 3), dtype=np.uint8)
+
+            cv2.fillPoly(img, [inner_lane], color=[0, 255, 0])
+
+
+            self.previous_inner_lane = img
+            return img
+
 
     def find_lane(self, image, distorted=True, reset = False):
         """

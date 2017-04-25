@@ -68,12 +68,13 @@ The vanishing point in an image is the point where it looks like the picture can
 * The vanishing point is the the <strong>intersection</strong> of all the lines built from the coordinates inside that list
 * It is the point with minimal squared distance from the lines in the hough list
 * The total squared distance
-![equation1](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/eqn/eqn1.png)
+* ![equation1](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/eqn/eqn1.png) (1)
+
 
 * where: I is the cost function, <strong>ni</strong> is the line normal to the hough lines and <strong>pi</strong> are the points on the hough lines
 * Then we minimize I w.r.t vp.
-# TODO: Insert eqn2 from /eqn/eqn2.png and label is eqn 2
-### Important: How we found source points
+* ![equation2](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/eqn/eqn2.png) (2)
+#### Finding source points:
 To find the source points using the vanishing point `vp`, we had to be clever.
 * So we have the vanishing point, which we can consider to be in the middle of our image. We want to locate a trapezoid that surrounds our lane lines.
 * We first declare two points `p1` and `p2` which are evenly offset from the vanishing point, and are closer to our vehicle.
@@ -83,11 +84,9 @@ To find the source points using the vanishing point `vp`, we had to be clever.
 * p1, p2, p3, and p4 form a trapezoid that will be our perspective transform region. our source points are [p1, p2, p3, p4].
 * The source points define the section of the image we will use for our warping transformation
 * The destination points are the where the source points will ultimately end up after we apply our warp. (pixels will be mapped from source points to destination points)
-
-# TODO: Insert vanishing_point_visualization in /filtering/vanishing_point_visualization.png
-# TODO: Here you can see the vanishing point as defined by the blue triangle
-
-# TODO: Insert perspective transform visualization from /filtering/perspective_transform_visualization.png
+* ![vanishing_pt](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/Vanishing_point.png)
+* Here you can see the vanishing point as defined by the blue triangle
+* ![perspective_transform](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/Trapezoid_for_perspective_transform.png)
 * Here you can see the Trapezoid mask we will be using for our perspective transform. The source points are marked with the + and ^ dots.
 
 #### Finding the distance
@@ -99,8 +98,8 @@ In our warped image there is no depth, it is planar. Therefore the Z in our homo
 We do this by scaling the x-dimension slot in the homography matrix by the y-dimension slot. Then we multiply that scaled value by our x_pixels_per_meter to obtain the y_pixels_per_meter. 
 * x_pixel_per_meter:  53.511326971489076
 * y_pixel_per_meter:  37.0398121547
-### Insert image: /filtering/lane_lines_center_markings.png
-You can see the centroids as the marked points in this image
+![lane_lines_center_markings](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/lane_lines_with_centroid_markings.png)
+* You can see the centroids as the marked points in this image
 * Then we save everything to a pickle file and move on to our lane line identification stage.
 * Code for this stage can be seen inside Perspective_Transform.ipynb
 

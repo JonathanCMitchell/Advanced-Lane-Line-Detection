@@ -29,6 +29,8 @@ by trying to put all my code inside a Jupyter notebook, but that did not work ou
 * lanelines.py
 * settings.py
 * helpers.py
+* Perspective transform.ipynb
+* Camera_calibration.ipynb
 
 ## output images: are inside /filtering/
 
@@ -41,8 +43,10 @@ by trying to put all my code inside a Jupyter notebook, but that did not work ou
 Where image_points describe where each of those pixels are in the 2D .png image. We then compute the transformation matrix `mtx` and the distortion coefficient matrix `dist`, save them to a pickle file,
 because later on in stage 3 we will recall and use them in `cv2.undistort()`.
 * Code for this stage can be seen in Camera Calibration.ipynb
+* You can see the original and undistorted images below
+* ![original_undistorted](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/output_images/original_undistorted.png)
 
-### Stage 2: Perspective Transformation:
+### Stage 2: Perspective Transformation (inside Perspective Transform.ipynb):
 * Our goal in this stage is to find source and destination points that we can use to warp our perspective to obtain an aerial view of the road.
 * This will allow us to calculate the distance in meters per pixel between the lane lines
 * It is also easier to work with the warped image inside the laneLine's objects, because we are dealing with straight vertical lines instead of angles lines.
@@ -96,8 +100,8 @@ We do this by scaling the x-dimension slot in the homography matrix by the y-dim
 * Then we save everything to a pickle file and move on to our lane line identification stage.
 * Code for this stage can be seen inside Perspective_Transform.ipynb
 
-### Stage 3: Lane Line Identification
-#### Step 1: Lane detection
+### Stage 3: Lane Line Identification (inside LaneFinder.py and LaneLineFinder.py)
+#### Step 1: Lane detection (LaneFinder.py)
 #### Preprocessing:
 * First we undistort the image
 * Then we warp the image into an aerial view
@@ -135,7 +139,7 @@ We do this by scaling the x-dimension slot in the homography matrix by the y-dim
 * I tried using 5x5 kernels at first for this erosion step. Ellipses were the best kernel shape because they will erode isolated pixels, but when the kernel size was (5, 5) it was too large and it started to erode the pixels that correspond to dashes inside the lane lines. So (3, 3) was the best option, even though occasionally it may remove pixels in between the lane lines.
 * ![total_maskl](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/output_images/total_mask_erode_kernel_3.png)
 * Now we pass this binary mask into our LaneLineFinder instance.
-#### Step 2: Line detection
+#### Step 2: Line detection (LaneLineFinder.py)
 * Input:
 * ![binary_mask](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/output_images/test_mask.png)
 

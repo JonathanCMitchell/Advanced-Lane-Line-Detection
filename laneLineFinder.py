@@ -34,23 +34,17 @@ class LaneLineFinder():
         self.curvature = None
 
     def find_lane_line(self, mask, reset = False):
-
         if self.first:
             self.get_initial_coeffs(mask, self.kind)
             fitx, ploty = self.get_line_pts(self.initial_coeffs)
             self.get_next_coeffs(mask, self.initial_coeffs, self.kind)
             self.first = False
 
-
         if not self.first:
             # Append recent coefficients
             self.recent_coefficients.append(self.next_coeffs)
-
             self.get_next_coeffs(mask, self.next_coeffs, self.kind)
-
-
             fitx, ploty = self.get_line_pts(self.next_coeffs)
-
 
         if self.kind == 'LEFT' and self.found:
             self.previous_line = self.line
@@ -65,7 +59,6 @@ class LaneLineFinder():
         self.line = self.draw_lines(mask, fitx, ploty)
         # Find new curvature or use previous curvature
         self.curvature = self.get_curvature(fitx, ploty) or self.previous_curvature
-
         # TODO: Find a way to determine whether a line has been found or not
 
     def reset_lane_line(self):
@@ -136,7 +129,6 @@ class LaneLineFinder():
         cv2.fillPoly(window_img, np.int_([line_pts]), (0, 20, 200))
         out_img = self.draw_pw(out_img, lane_points, color)
         return out_img
-
 
     def get_initial_coeffs(self, mask, kind):
         histogram = np.sum(mask[int(mask.shape[0] / 2):, :], axis=0)

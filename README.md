@@ -186,6 +186,8 @@ alt="Watch Video Here" width="480" height="180" border="10" /></a>
 * I should have created a reset option, so that if the detected line deviates too far from the average we will do a complete reset and then look for the next line as if it was the first line.
 This would help solve the challenge video.
 
+TODO: Implement averaging so the lines are drawn from the coefficients of the previous 5 frames for smoothing.
+
 
 #### Twitter: [@jonathancmitch](https://twitter.com/jonathancmitch)
 #### Linkedin: [https://www.linkedin.com/in/jonathancmitchell](https://twitter.com/jonathancmitch)

@@ -143,8 +143,40 @@ We do this by scaling the x-dimension slot in the homography matrix by the y-dim
 * ![total_maskl](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/total_mask_erode_kernel_3.png)
 * Now we pass this binary mask into our LaneLineFinder instance.
 #### Step 2: Line detection
+* Input:
+* ![binary_mask](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/test_mask.png)
 
-
+* The LaneLineFinder finds one lane line, either left or right given a warped image (aerial view)
+#### pt1: LaneLineFinder get_initial_coefficients (lines 123 to 188)
+* Take the bottom vertical half of the image and compute the vertical sum of the pixel values (histogram)
+* Find the max index, and use that as a starting point
+* Then search for small window boxes from the bottom up to find the max pixel density (that is where the lane lines are)
+* ![window_boxes](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/new_newfit.png)
+* Save the good centroids to a list
+* Calculate the coefficients for the equation f(x) = ay^2 + by + c. You can see this line 188 as the result of [np.polyfit](https://docs.scipy.org/doc/numpy/reference/generated/numpy.polyfit.html)
+#### pt2: For the next frame, use get_next_coefficients (lines 71-86)
+* Since we know where the lane lines were from the first frame, we don't have to start our search from scratch. 
+* Scan around the previous coefficients for the next lane line marking within a reasonable margin (line 77)
+* We look within a margin for the next point, instead of scanning the entire image from scratch again
+* If there is a large deviation from the average, then our line is not good, and we set our found property to false, then in our LaneFinder we will use the previous good line instead of this line
+* You can see this feature in the video stream. When the lane line starts to drive off and deviate from the previous line it resets back to the previous good line
+* Now we have the coefficients
+#### pt3: Use get_line_pts (line 101 - 104)
+* Here we pass in the coefficients and receive our X and Y values to plot. 
+#### pt4: Use draw_lines (line 116-131)
+* Here we take in the x and y coordinates as `fitx` and `plot_y` respectively
+* Then we calculate our lane points and fill a window with [cv2.fillPoly](http://docs.opencv.org/3.0-beta/modules/imgproc/doc/drawing_functions.html). This gives us extra padding on the left and right of the line so it looks thick
+* Then we pass our lane points into `draw_pw` (lines 106 - 114) which draws each segment inside a for loop
+* Then we return the drawn lines to LaneFinder
+* If the line wasn't detected we simply use the previous lane line.
+#### pt5: Calculate curvature
+* inside get_curvature line (190 - 204) we calculate the curvature following [this](http://www.intmath.com/applications-differentiation/8-radius-curvature.php) procedure
+* We use the x_pixels_per meter and y_pixels_per_meter that we found in our perspective transform notebook (stage 2)
+#### last part: Receive lines in LaneFinder
+* Then we receive the lines for the left and right lane line as LaneFinder.left_line and LaneFinder.right_line respectively.
+* Then we use [cv2.add_weighted](http://docs.opencv.org/2.4/modules/core/doc/operations_on_arrays.html) with the warped image and the combination of both the lane lines.
+* Then we unwarp the image and return it
+* AND THAT's IT!
 
 
 

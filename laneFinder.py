@@ -28,8 +28,7 @@ class LaneFinder():
         self.previous_lanes = []
         self.count = 0
         self.center_diff = None
-        self.previous_inner_lane = np.zeros((img_size[1], img_size[0], 3), dtype = np.uint8)
-
+        self.previous_inner_lane = np.zeros((self.warped_size[1], self.warped_size[0], 3), dtype = np.uint8)
 
     def warp(self, img):
         return cv2.warpPerspective(img, self.transform_matrix, self.warped_size,
@@ -75,17 +74,21 @@ class LaneFinder():
 
         both = (left + right)
         # TODO: Redo how we define both
-        from scipy.stats import describe
-        inner = self.get_inner_lane()
-        inner_good = np.any(inner[inner > 1])
+        inner, b = self.isGet_inner_lane()
 
-        if not inner_good:
+        if b is False:
             inner = self.previous_inner_lane
+        #
+        #
+        # from scipy.stats import describe
+        # inner = self.get_inner_lane()
+        # print('inner : ', inner)
+        # if not inner:
+        #     inner = self.previous_inner_lane
 
         lanes = left + right + inner
 
-        plt.imshow(lanes)
-        plt.show()
+
         # FIND CENTER
         if self.left_line.found and self.right_line.found:
             camera_center = (self.left_line.last_fitx + self.right_line.last_fitx)/2
@@ -115,7 +118,7 @@ class LaneFinder():
         return img
 
 
-    def get_inner_lane(self):
+    def isGet_inner_lane(self):
         if self.left_line.found and self.right_line.found:
             # self.previous_middle =
             left_fitx = self.left_line.fitx
@@ -133,8 +136,9 @@ class LaneFinder():
 
 
             self.previous_inner_lane = img
-            return img
-
+            return img, True
+        else:
+            return None, False
 
     def find_lane(self, image, distorted=True, reset = False):
         """

@@ -119,7 +119,7 @@ class LaneLineFinder():
             y1 = pts[i][1]
             x2 = pts[i+1][0]
             y2 = pts[i+1][1]
-            cv2.line(img, (x1, y1), (x2, y2), color, 15)
+            cv2.line(img, (x1, y1), (x2, y2), color, 9)
         return img
 
     def draw_lines(self, mask, fitx, ploty):

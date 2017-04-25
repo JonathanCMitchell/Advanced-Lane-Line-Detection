@@ -34,6 +34,8 @@ class LaneLineFinder():
         self.curvature = None
         self.previous_curvature = None
         self.last_fitx = None
+        self.fitx = np.array([]).astype(np.float64)
+        self.ploty = np.array([]).astype(np.float64)
 
     def find_lane_line(self, mask, reset = False):
 
@@ -123,6 +125,9 @@ class LaneLineFinder():
     def draw_lines(self, mask, fitx, ploty):
         if self.kind == 'LEFT': color = (20, 200, 100)
         if self.kind == 'RIGHT': color = (200, 100, 20)
+
+        self.fitx = fitx
+        self.ploty = ploty
 
         out_img = np.dstack((mask, mask, mask)) * 255
         window_img = np.zeros_like(out_img)

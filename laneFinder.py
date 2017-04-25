@@ -3,7 +3,6 @@ import numpy as np
 import settings
 from laneLineFinder import LaneLineFinder
 import math
-import matplotlib.pyplot as plt
 
 class LaneFinder():
     def __init__(self,

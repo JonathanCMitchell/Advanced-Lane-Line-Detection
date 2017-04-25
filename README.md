@@ -87,6 +87,7 @@ To find the source points using the vanishing point `vp`, we had to be clever.
 * Here you can see the Trapezoid mask we will be using for our perspective transform. The source points are marked with the + and ^ dots.
 
 #### Finding the distance
+* A lot of the methods applied here were suggested by ajsmilutin in [this](https://github.com/ajsmilutin/CarND-Advanced-Lane-Lines/blob/master/README.md) repository.
 * We use moments in order to find the distance between two lane lines in our warped images.
 * Lane lines are ~12 feet apart in the real world. We can use this info to find out how many pixels in our image equals 1 meter.
 * We find the area between the lane lines using the zeroth moment, then we divide the first moment by the zeroth moment to get a centroid, (the center point) for both the right and left lane lines in the x-dimension.
@@ -183,10 +184,15 @@ alt="Watch Video Here" width="480" height="180" border="10" /></a>
 
 
 ## Reflection
+* I attempted to structure my basic outline similar to how ajsmilutin did in [this](https://github.com/ajsmilutin/CarND-Advanced-Lane-Lines/blob/master/README.md) repository. However my implementation details and methods are far different. I experimented with many different kernels, and it turns out, the ones he used in his process are the best. I tried to prove him wrong and use (29, 29)'s for the first erosion, but it ended up not working properly. 
+* In fact. I used a lot of what he did, and it took me a LONG time to wrap my head around how it works. The OOP structure he uses in his implementation was new to me, because I don't have that much experience with OOP programming in python, so I learned a lot by trying to reproduce what he did, except I did it in a very different way. I used the adaptive thresholding technique instead of doing sobelx, sobely, and magnitude gradients because it proves to be far better in performance on the challenge video. Even though I couldn't get the challenge video to work well for my implementation. Credit where credit is due, I learned a TON about filtering from ajsmulitin.
 * I should have created a reset option, so that if the detected line deviates too far from the average we will do a complete reset and then look for the next line as if it was the first line.
 This would help solve the challenge video.
+* I still need to create an averaging function so that the drawn lines are drawn from the coefficients of the previous 5 frames for smoothing.
+* I also received the idea for using the histogram from Udacity's starter code.
+* Originally I tried using a convolutional window, but it proved to not work as well. I was using a rectangular window for a very long time, and it was receiving outputs that did not correspond to the index of my max argument. Later on I discovered that I should be using a gaussian filter, so that the peak will be clear.
+* I would not have been able to figure out how to use moments to find centroids with ajsmulitins code. It was hard for me to disect his code and see exactly what it was doing. Not an easy task.
 
-TODO: Implement averaging so the lines are drawn from the coefficients of the previous 5 frames for smoothing.
 
 
 #### Twitter: [@jonathancmitch](https://twitter.com/jonathancmitch)

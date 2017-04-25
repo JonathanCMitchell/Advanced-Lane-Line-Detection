@@ -33,30 +33,37 @@ class LaneLineFinder():
         self.deviations = []# TODO: Remove later
         self.curvature = None
         self.previous_curvature = None
+        self.last_fitx = None
+        self.fitx = np.array([]).astype(np.float64)
+        self.ploty = np.array([]).astype(np.float64)
 
     def find_lane_line(self, mask, reset = False):
+
         if self.first:
             self.get_initial_coeffs(mask, self.kind)
             fitx, ploty = self.get_line_pts(self.initial_coeffs)
             self.get_next_coeffs(mask, self.initial_coeffs, self.kind)
             self.first = False
+            self.last_fitx = fitx[-1]
+
 
         if not self.first:
             # Append recent coefficients
             self.recent_coefficients.append(self.next_coeffs)
             self.get_next_coeffs(mask, self.next_coeffs, self.kind)
             fitx, ploty = self.get_line_pts(self.next_coeffs)
+            self.last_fitx = fitx[-1]
 
-        self.line = self.draw_lines(mask, fitx, ploty)
-        # Find new curvature or use previous curvature
-        self.curvature = self.get_curvature(fitx, ploty) or self.previous_curvature
+        if self.found:
+            self.curvature = self.get_curvature(fitx, ploty) or self.previous_curvature
+            self.previous_curvature = self.curvature
+            self.line = self.draw_lines(mask, fitx, ploty)
+
 
         if self.kind == 'LEFT' and self.found:
             self.previous_line = self.line
-            self.previous_curvature = self.get_curvature(fitx, ploty)
         if self.kind == 'RIGHT' and self.found:
             self.previous_line = self.line
-            self.previous_curvature = self.get_curvature(fitx, ploty)
 
         if reset:
             self.reset_lane_line()
@@ -74,17 +81,19 @@ class LaneLineFinder():
         nonzeroy = np.array(nonzero[0])
         nonzerox = np.array(nonzero[1])
 
+        # Should this be first coeffs or previous coeffs
         lane_inds = ((nonzerox > coeffs[0] * (nonzeroy **2)
                      + coeffs[1] * nonzeroy + coeffs[2] - self.nextMargin)) & \
                     (nonzerox < coeffs[0] * (nonzeroy ** 2) + coeffs[1] * nonzeroy + coeffs[2] + self.nextMargin)
 
 
+        # print('inside next: ', len(lane_inds))
         x = nonzerox[lane_inds]
         y = nonzeroy[lane_inds]
-
         self.next_coeffs = np.polyfit(y, x, 2)
 
         if len(self.recent_coefficients) > 0:
+            # todo: fix issue that it starts checking after 25 frames. otherwise if you put 25 here it wont write until 25 frames
             to_check = np.mean(np.array(self.recent_coefficients[-25:]), axis = 0)
             deviation = np.abs(np.subtract(to_check, self.next_coeffs))
 
@@ -97,8 +106,6 @@ class LaneLineFinder():
             else:
                 self.found = True
 
-        if len(self.recent_coefficients) > 5:
-            self.next_coeffs = np.average(self.recent_coefficients[-5:], axis = 0)
 
     def get_line_pts(self, coeffs):
         ploty = np.linspace(0, self.img_height - 1, self.img_height)
@@ -112,12 +119,15 @@ class LaneLineFinder():
             y1 = pts[i][1]
             x2 = pts[i+1][0]
             y2 = pts[i+1][1]
-            cv2.line(img, (x1, y1), (x2, y2), color, 15)
+            cv2.line(img, (x1, y1), (x2, y2), color, 9)
         return img
 
     def draw_lines(self, mask, fitx, ploty):
         if self.kind == 'LEFT': color = (20, 200, 100)
         if self.kind == 'RIGHT': color = (200, 100, 20)
+
+        self.fitx = fitx
+        self.ploty = ploty
 
         out_img = np.dstack((mask, mask, mask)) * 255
         window_img = np.zeros_like(out_img)
@@ -131,6 +141,7 @@ class LaneLineFinder():
         cv2.fillPoly(window_img, np.int_([line_pts]), (0, 20, 200))
         out_img = self.draw_pw(out_img, lane_points, color)
         return out_img
+
 
     def get_initial_coeffs(self, mask, kind):
         histogram = np.sum(mask[int(mask.shape[0] / 2):, :], axis=0)
@@ -200,9 +211,5 @@ class LaneLineFinder():
 
         y_eval = np.max(ploty)
         fit_cr = np.polyfit(ploty * ym_per_pix, fitx * xm_per_pix, 2)
-
-
-        curvature =  ((1 + (2*fit_cr[0]*y_eval*ym_per_pix + fit_cr[1])**2)**1.5) / np.absolute(2*fit_cr[0])
-        return curvature
-        # print('self.curvature: ', self.curvature, 'for: ', self.kind)
+        return ((1 + (2*fit_cr[0]*y_eval*ym_per_pix + fit_cr[1])**2)**1.5) / np.absolute(2*fit_cr[0])
 

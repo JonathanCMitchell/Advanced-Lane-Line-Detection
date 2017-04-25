@@ -194,6 +194,7 @@ This would help solve the challenge video.
 * I would not have been able to figure out how to use moments to find centroids with ajsmulitins code. It was hard for me to disect his code and see exactly what it was doing. Not an easy task.
 * Special thanks to Kyle Stewart-Frantz who helped me think about how to find the deviations when I was <strong> completely stuck </strong>
 * Originally I was working with jupyter notebooks, and then I got pycharm and my life changed when I figured out how to use the debugger. Completely necessary!!
+* I used a pandas dataframe to test individual image sequences without having to process the entire video.I converted the video into a csv and img folder. The code for this can be seen in VideoAcquisition.ipynb
 
 #### Twitter: [@jonathancmitch](https://twitter.com/jonathancmitch)
 #### Linkedin: [https://www.linkedin.com/in/jonathancmitchell](https://twitter.com/jonathancmitch)

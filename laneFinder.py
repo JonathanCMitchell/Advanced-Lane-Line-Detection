@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import settings
-from laneLineFinder import LaneLineFinder
+from LaneLineFinderOld import LaneLineFinder
 import math
 
 class LaneFinder():
@@ -53,11 +53,11 @@ class LaneFinder():
 
         if not self.left_line.found:
             left = self.left_line.previous_line
-            curve_left = self.left_line.curvature
+            curve_left = self.left_line.previous_curvature
 
         if not self.right_line.found:
             right = self.right_line.previous_line # should be an instance
-            curve_right = self.right_line.curvature
+            curve_right = self.right_line.previous_curvature
 
         if self.left_line.found:
             left = self.left_line.line
@@ -66,12 +66,8 @@ class LaneFinder():
             right = self.right_line.line
             curve_right = self.right_line.curvature
 
-        if curve_left:
-            curve = curve_left
-        else:
-            curve = curve_right
+        curve = curve_left or curve_right
 
-        # TODO: Can I make this: curve = curve_left or curve_right
 
         both = (left + right)
 

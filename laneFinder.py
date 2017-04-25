@@ -33,11 +33,9 @@ class LaneFinder():
     def warp(self, img):
         return cv2.warpPerspective(img, self.transform_matrix, self.warped_size,
                                    flags=cv2.WARP_FILL_OUTLIERS + cv2.INTER_NEAREST)
-
     def unwarp(self, img):
         return cv2.warpPerspective(img, self.transform_matrix, self.img_size,
                                    flags=cv2.WARP_FILL_OUTLIERS + cv2.INTER_NEAREST + cv2.WARP_INVERSE_MAP)
-
     def undistort(self, img):
         return cv2.undistort(img, self.camera_matrix, self.dist_coeffs)
 
@@ -51,9 +49,6 @@ class LaneFinder():
         output: original image with lane lines overlayed
         """
         self.find_lane(image)
-
-        warped = self.warp(image)
-
         if not self.left_line.found:
             left = self.left_line.previous_line
             curve_left = self.left_line.previous_curvature
@@ -71,23 +66,12 @@ class LaneFinder():
 
         curve = curve_left or curve_right
 
-
         both = (left + right)
         # TODO: Redo how we define both
         inner, b = self.isGet_inner_lane()
-
         if b is False:
             inner = self.previous_inner_lane
-        #
-        #
-        # from scipy.stats import describe
-        # inner = self.get_inner_lane()
-        # print('inner : ', inner)
-        # if not inner:
-        #     inner = self.previous_inner_lane
-
         lanes = left + right + inner
-
 
         # FIND CENTER
         if self.left_line.found and self.right_line.found:
@@ -98,25 +82,15 @@ class LaneFinder():
         if self.center_diff <= 0:
             side_pos = 'right'
 
-        warped_weighted = self.add_weighted(warped, lanes)
-
         unwarp_lanes = self.unwarp(lanes)
         original_weighted = self.add_weighted(image, unwarp_lanes)
-
         original_weighted = self.add_curvature_and_center(original_weighted, curve, self.center_diff, side_pos)
-
         return original_weighted
 
     def add_curvature_and_center(self, img, curve, center_diff, side_pos):
-        # TODO: Change ceil to round
-        # TODO: Add rounding to center diff
-
-        cv2.putText(img, 'Radius of curvature = ' + str(curve) + '(m)', (50, 50),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-        cv2.putText(img, 'Vehicle is: ' + str(center_diff) + 'm ' + str(side_pos) + 'of center', (50, 100),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+        cv2.putText(img, 'Radius of curvature = ' + str(curve)[:-7] + '(m)', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+        cv2.putText(img, 'Vehicle is: ' + str(center_diff)[:-9] + '(m) ' + str(side_pos) + 'of center', (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
         return img
-
 
     def isGet_inner_lane(self):
         if self.left_line.found and self.right_line.found:
@@ -129,12 +103,8 @@ class LaneFinder():
                 np.concatenate((left_fitx, \
                                 right_fitx[::-1]), axis = 0), \
                 np.concatenate((ploty, ploty[::-1]), axis = 0))), np.int32)
-
             img = np.zeros((self.warped_size[1], self.warped_size[0], 3), dtype=np.uint8)
-
             cv2.fillPoly(img, [inner_lane], color=[0, 255, 0])
-
-
             self.previous_inner_lane = img
             return img, True
         else:
@@ -216,36 +186,5 @@ class LaneFinder():
         # erosion on total_mask to reduce noise
         self.total_mask = cv2.morphologyEx(self.total_mask, cv2.MORPH_ERODE, small_ellipse)
 
-        left_mask = self.total_mask
-        # right_mask = self.total_mask
-        # if self.right_line.found:
-        #     # left mask is NOT the right line mask and not the right line's other mask, this mask is binary
-        #     left_mask = self.total_mask & np.logical_not(self.right_line.line_mask)
-        # if self.left_line.found:
-        # right_mask = self.total_mask & np.logical_note(self.left_line.line_mask)
-
-
-        # TODO: Check if lines are found, if not, use the previous lane lines
-
         self.left_line.find_lane_line(self.total_mask)
         self.right_line.find_lane_line(self.total_mask)
-
-        # plt.imshow(self.left_line.line)
-
-        # weighted = self.add_weighted(warped, self.left_line.line)
-        #
-        # if self.left_line.found and self.right_line.found:
-        #     weighted = self.add_weighted(warped, (self.left_line.line + self.right_line.line))
-        #
-        # return weighted
-
-        # TODO: Add weighted between left line and image,
-
-        #
-        # if self.left_line.isGood and self.right_line.isGood:
-        #     lanes = (self.left_line + self.right_line) & mask
-
-        # TODO: IMplement what happens when we find a lane or don't find a lane
-        # TODO: Decision, do you want to check for lane lines and use previous ones here or inside LaneLineFinder?
-        # lanes = self.left_line.find_lane_line(self.total_mask, kind = 'LEFT')
-        # return lanes

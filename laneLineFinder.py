@@ -1,10 +1,5 @@
-from helpers import add_recent_centers
-from helpers import moving_average_scale
-import matplotlib.pyplot as plt
 import cv2
 import numpy as np
-
-# TODO: Add averaging method to average / smooth the most recent polynomial coefficients
 
 class LaneLineFinder():
     """
@@ -187,8 +182,6 @@ class LaneLineFinder():
             # If we get more than 5 good indices then we append
             if len(good_inds) > 5:
                 lane_inds.append(good_inds)
-
-            # print('inside first: ', len(good_inds))
 
         # Concatenate the arrays of indices
         lane_inds = np.concatenate(lane_inds)

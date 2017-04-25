@@ -174,12 +174,13 @@ We do this by scaling the x-dimension slot in the homography matrix by the y-dim
 * Then we receive the lines for the left and right lane line as LaneFinder.left_line and LaneFinder.right_line respectively.
 * Then we use [cv2.add_weighted](http://docs.opencv.org/2.4/modules/core/doc/operations_on_arrays.html) with the warped image and the combination of both the lane lines.
 * Then we unwarp the image and return it
-* AND THAT's IT!
-
+* I calculated the center place using the last fit coordinates of the left and right lines
+* I used the left fit coordinate and the right fit coordinates to determine the accurate indices to draw the middle lane. You can see this inside laneFinder lines (121 - 141)
+* ![drawn_line](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/master/output_images/0drawn_on.jpg)
 ### Video of result
 
-<a href="http://www.youtube.com/embed/6qCmt0zfq-k
-" target="_blank"><img src="http://img.youtube.com/vi/6qCmt0zfq-k/0.jpg" 
+<a href="http://www.youtube.com/embed/O7FftErvVU4
+" target="_blank"><img src="http://img.youtube.com/vi/O7FftErvVU4/0.jpg" 
 alt="Watch Video Here" width="480" height="180" border="10" /></a>
 
 
@@ -195,6 +196,10 @@ This would help solve the challenge video.
 * Special thanks to Kyle Stewart-Frantz who helped me think about how to find the deviations when I was <strong> completely stuck </strong>
 * Originally I was working with jupyter notebooks, and then I got pycharm and my life changed when I figured out how to use the debugger. Completely necessary!!
 * I used a pandas dataframe to test individual image sequences without having to process the entire video.I converted the video into a csv and img folder. The code for this can be seen in VideoAcquisition.ipynb
+
+## TODO:
+* Add an erosion step at the very end to get rid of the dots
+* Code cleanup
 
 #### Twitter: [@jonathancmitch](https://twitter.com/jonathancmitch)
 #### Linkedin: [https://www.linkedin.com/in/jonathancmitchell](https://twitter.com/jonathancmitch)

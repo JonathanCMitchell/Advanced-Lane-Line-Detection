@@ -68,9 +68,7 @@ The vanishing point in an image is the point where it looks like the picture can
 * The vanishing point is the the <strong>intersection</strong> of all the lines built from the coordinates inside that list
 * It is the point with minimal squared distance from the lines in the hough list
 * The total squared distance
-# TODO: Insert eqn1 from /eqn/eqn1.png and label it eqn1
-### Architecture Design:
-![architecture design](https://github.com/JonathanCMitchell/)
+![equation1](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/eqn/eqn1.png)
 
 * where: I is the cost function, <strong>ni</strong> is the line normal to the hough lines and <strong>pi</strong> are the points on the hough lines
 * Then we minimize I w.r.t vp.

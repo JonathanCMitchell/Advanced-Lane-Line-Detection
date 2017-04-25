@@ -44,7 +44,7 @@ Where image_points describe where each of those pixels are in the 2D .png image.
 because later on in stage 3 we will recall and use them in `cv2.undistort()`.
 * Code for this stage can be seen in Camera Calibration.ipynb
 * You can see the original and undistorted images below
-* ![original_undistorted](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/output_images/original_undistorted.png)
+* ![original_undistorted](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/master/output_images/original_undistorted.png)
 
 ### Stage 2: Perspective Transformation (inside Perspective Transform.ipynb):
 * Our goal in this stage is to find source and destination points that we can use to warp our perspective to obtain an aerial view of the road.

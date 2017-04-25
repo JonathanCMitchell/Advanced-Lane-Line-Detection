@@ -10,7 +10,7 @@ class LaneLineFinder():
         self.img_size = img_size
         self.x_pixels_per_meter = x_pixels_per_meter
         self.y_pixels_per_meter = y_pixels_per_meter
-        self.smooth_factor = 15
+        self.smooth_factor = 7
         self.found = False
         self.first = True
         self.kind = kind
@@ -25,12 +25,12 @@ class LaneLineFinder():
         self.firstMargin = 50
         self.nextMargin = 15
         self.recent_coefficients = []
-        self.deviations = []# TODO: Remove later
         self.curvature = None
         self.previous_curvature = None
         self.last_fitx = None
         self.fitx = np.array([]).astype(np.float64)
         self.ploty = np.array([]).astype(np.float64)
+        self.line_width = 9
 
     def find_lane_line(self, mask, reset = False):
 
@@ -135,7 +135,7 @@ class LaneLineFinder():
             y1 = pts[i][1]
             x2 = pts[i+1][0]
             y2 = pts[i+1][1]
-            cv2.line(img, (x1, y1), (x2, y2), color, 9)
+            cv2.line(img, (x1, y1), (x2, y2), color, self.line_width)
         return img
 
     def draw_lines(self, mask, fitx, ploty):

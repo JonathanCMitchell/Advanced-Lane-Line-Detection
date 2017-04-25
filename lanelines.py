@@ -22,24 +22,24 @@ lf = LaneFinder(settings.ORIGINAL_SIZE, settings.UNWARPED_SIZE, camera_matrix, d
                         M, x_pixels_per_meter, y_pixels_per_meter)
 
 # PROCESS MULTIPLE IMAGES
-for i in range(0, 20):
-    print('COUNT: ', i)
-    row = df.iloc[[i]]
-    impath = df.iloc[[i]]['image_path'].values[0]
-    img = mpimg.imread(impath)
-    process_image = lf.process_image(img)
-    image = process_image
-    cv2.imwrite('./results/' + str(i) + 'drawn_on' + '.jpg', cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+# for i in range(0, 20):
+#     print('COUNT: ', i)
+#     row = df.iloc[[i]]
+#     impath = df.iloc[[i]]['image_path'].values[0]
+#     img = mpimg.imread(impath)
+#     process_image = lf.process_image(img)
+#     image = process_image
+#     cv2.imwrite('./results/' + str(i) + 'drawn_on' + '.jpg', cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
 #  # MOVIEPY project video
-# from moviepy.editor import VideoFileClip
-#
-# test_output = 'project_video_output_averaged_2222.mp4'
-# clip1 = VideoFileClip("project_video.mp4")
-# lf = LaneFinder(settings.ORIGINAL_SIZE, settings.UNWARPED_SIZE, camera_matrix, dist_coeffs,
-#                         M, x_pixels_per_meter, y_pixels_per_meter)
-# white_clip = clip1.fl_image(lf.process_image) #NOTE: this function expects color images!!
-# white_clip.write_videofile(test_output, audio=False)
+from moviepy.editor import VideoFileClip
+
+test_output = 'project_video_output_averaged_new.mp4'
+clip1 = VideoFileClip("project_video.mp4")
+lf = LaneFinder(settings.ORIGINAL_SIZE, settings.UNWARPED_SIZE, camera_matrix, dist_coeffs,
+                        M, x_pixels_per_meter, y_pixels_per_meter)
+white_clip = clip1.fl_image(lf.process_image) #NOTE: this function expects color images!!
+white_clip.write_videofile(test_output, audio=False)
 
 # from moviepy.editor import VideoFileClip
 #

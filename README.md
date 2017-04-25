@@ -126,7 +126,7 @@ We do this by scaling the x-dimension slot in the homography matrix by the y-dim
 * Tophat the `lab`, `hls`, and the `yellow` filter. Tophat reduces noise from tiny pixels. Tophat = opening + dilation. Read about it [here](http://docs.opencv.org/3.2.0/d3/dbe/tutorial_opening_closing_hats.html)
 * See the filters here:
 * This is what the `hls` luminance filter picked up:
-* ![hls_filter](https://github.com/JonathanCMitchell/Avanced-Lane-Line-Detection/blob/feature/histogram/filtering/hls_luminance_filtering_difference.png)
+* ![hls_filter](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/hls_luminance_filtering_difference.png)
 
 * Here is the `hls` saturation filter
 * ![hls_saturation_filter](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/hsl_saturation_luminance_filtering.png)

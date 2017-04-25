@@ -200,7 +200,7 @@ This would help solve the challenge video.
 ## TODO:
 * Add an erosion step at the very end to get rid of the dots
 * Code cleanup
-
+ 
 #### Twitter: [@jonathancmitch](https://twitter.com/jonathancmitch)
 #### Linkedin: [https://www.linkedin.com/in/jonathancmitchell](https://twitter.com/jonathancmitch)
 #### Github: [github.com/jonathancmitchell](github.com/jonathancmitchell)

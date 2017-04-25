@@ -32,6 +32,7 @@ class LaneLineFinder():
         self.recent_coefficients = []
         self.deviations = []# TODO: Remove later
         self.curvature = None
+        self.previous_curvature = None
 
     def find_lane_line(self, mask, reset = False):
 
@@ -85,12 +86,11 @@ class LaneLineFinder():
 
 
         # print('inside next: ', len(lane_inds))
-        # TODO: If count > 1 should be self.prev_coeffs instead of self.first_coeffs
         x = nonzerox[lane_inds]
         y = nonzeroy[lane_inds]
         self.next_coeffs = np.polyfit(y, x, 2)
 
-        if len(self.recent_coefficients) > 0:
+        if len(self.recent_coefficients) > 26:
             # TODO: Check that there are > 25 recent_coefficients to check against not 0
             to_check = np.mean(np.array(self.recent_coefficients[-25:]), axis = 0)
             deviation = np.abs(np.subtract(to_check, self.next_coeffs))
@@ -103,10 +103,6 @@ class LaneLineFinder():
                 self.found = False
             else:
                 self.found = True
-
-        if len(self.recent_coefficients) > 6:
-            # TODO: This may effect the averaging
-            self.next_coeffs = np.mean(np.array(self.recent_coefficients[-25:]), axis=0)
 
 
     def get_line_pts(self, coeffs):

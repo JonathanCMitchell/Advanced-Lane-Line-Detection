@@ -77,9 +77,9 @@ To find the source points using the vanishing point `vp`, we had to be clever.
 * p1, p2, p3, and p4 form a trapezoid that will be our perspective transform region. our source points are [p1, p2, p3, p4].
 * The source points define the section of the image we will use for our warping transformation
 * The destination points are the where the source points will ultimately end up after we apply our warp. (pixels will be mapped from source points to destination points)
-* ![vanishing_pt](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/img/Vanishing_point.png)
+* ![vanishing_pt](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/output_images/Vanishing_point.png)
 * Here you can see the vanishing point (blue triangle)
-* ![perspective_transform](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/img/Trapezoid_for_perspective_transform.png)
+* ![perspective_transform](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/output_images/Trapezoid_for_perspective_transform.png)
 * Here you can see the Trapezoid mask we will be using for our perspective transform. The source points are marked with the + and ^ dots.
 
 #### Finding the distance
@@ -91,7 +91,7 @@ In our warped image there is no depth, it is planar. Therefore the Z in our homo
 We do this by scaling the x-dimension slot in the homography matrix by the y-dimension slot. Then we multiply that scaled value by our x_pixels_per_meter to obtain the y_pixels_per_meter. 
 * x_pixel_per_meter:  53.511326971489076
 * y_pixel_per_meter:  37.0398121547
-* ![lane_lines_center_markings](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/img/lane_lines_with_centroid_markings.png)
+* ![lane_lines_center_markings](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/output_images/lane_lines_with_centroid_markings.png)
 * You can see the centroids as the marked points in this image
 * Then we save everything to a pickle file and move on to our lane line identification stage.
 * Code for this stage can be seen inside Perspective_Transform.ipynb
@@ -101,7 +101,7 @@ We do this by scaling the x-dimension slot in the homography matrix by the y-dim
 #### Preprocessing:
 * First we undistort the image
 * Then we warp the image into an aerial view
-* ![warped](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/test_road.png)
+* ![warped](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/output_images/test_road.png)
 
 #### Filtering: (in LaneFinder.py lines 114 to 143)
 * We first create two copies of our warped image, an `hls` and a `lab` colorspace copy. 
@@ -119,32 +119,32 @@ We do this by scaling the x-dimension slot in the homography matrix by the y-dim
 * Tophat the `lab`, `hls`, and the `yellow` filter. Tophat reduces noise from tiny pixels. Tophat = opening + dilation. Read about it [here](http://docs.opencv.org/3.2.0/d3/dbe/tutorial_opening_closing_hats.html)
 * See the filters here:
 * This is what the `hls` luminance filter picked up:
-* ![hls_filter](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/hls_luminance_filtering_difference.png)
+* ![hls_filter](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/output_images/hls_luminance_filtering_difference.png)
 
 * Here is the `hls` saturation filter
-* ![hls_saturation_filter](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/hsl_saturation_luminance_filtering.png)
+* ![hls_saturation_filter](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/output_images/hsl_saturation_luminance_filtering.png)
 
 * Here is the region of interest filter (after we NOT the nature part)
-* ![roi_mask](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/region_of_interest_mask.png)
+* ![roi_mask](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/output_images/region_of_interest_mask.png)
 
 * Then we perform adaptive thresholding (LaneFinder.py lines 160-162)
 * Then we combine this mask with the roi_mask to create a difference mask (shown below)
-* ![difference_mask](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/difference_mask.png)
+* ![difference_mask](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/output_images/difference_mask.png)
 
 * Then we perform erosion on the difference mask to obtain the total mask. 
 * I tried using 5x5 kernels at first for this erosion step. Ellipses were the best kernel shape because they will erode isolated pixels, but when the kernel size was (5, 5) it was too large and it started to erode the pixels that correspond to dashes inside the lane lines. So (3, 3) was the best option, even though occasionally it may remove pixels in between the lane lines.
-* ![total_maskl](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/total_mask_erode_kernel_3.png)
+* ![total_maskl](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/output_images/total_mask_erode_kernel_3.png)
 * Now we pass this binary mask into our LaneLineFinder instance.
 #### Step 2: Line detection
 * Input:
-* ![binary_mask](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/test_mask.png)
+* ![binary_mask](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/output_images/test_mask.png)
 
 * The LaneLineFinder finds one lane line, either left or right given a warped image (aerial view)
 #### pt1: LaneLineFinder get_initial_coefficients (lines 123 to 188)
 * Take the bottom vertical half of the image and compute the vertical sum of the pixel values (histogram)
 * Find the max index, and use that as a starting point
 * Then search for small window boxes from the bottom up to find the max pixel density (that is where the lane lines are)
-* ![window_boxes](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/filtering/new_newfit.png)
+* ![window_boxes](https://github.com/JonathanCMitchell/Advanced-Lane-Line-Detection/blob/feature/histogram/output_images/new_newfit.png)
 * Save the good centroids to a list
 * Calculate the coefficients for the equation f(x) = ay^2 + by + c. You can see this line 188 as the result of [np.polyfit](https://docs.scipy.org/doc/numpy/reference/generated/numpy.polyfit.html)
 #### pt2: For the next frame, use get_next_coefficients (lines 71-86)

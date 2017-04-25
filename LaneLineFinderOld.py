@@ -33,6 +33,7 @@ class LaneLineFinder():
         self.deviations = []# TODO: Remove later
         self.curvature = None
         self.previous_curvature = None
+        self.last_fitx = None
 
     def find_lane_line(self, mask, reset = False):
 
@@ -41,16 +42,15 @@ class LaneLineFinder():
             fitx, ploty = self.get_line_pts(self.initial_coeffs)
             self.get_next_coeffs(mask, self.initial_coeffs, self.kind)
             self.first = False
+            self.last_fitx = fitx[-1]
 
 
         if not self.first:
             # Append recent coefficients
             self.recent_coefficients.append(self.next_coeffs)
-
             self.get_next_coeffs(mask, self.next_coeffs, self.kind)
-
-
             fitx, ploty = self.get_line_pts(self.next_coeffs)
+            self.last_fitx = fitx[-1]
 
         if self.found:
             self.curvature = self.get_curvature(fitx, ploty) or self.previous_curvature

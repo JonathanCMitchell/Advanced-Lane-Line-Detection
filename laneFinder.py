@@ -26,6 +26,7 @@ class LaneFinder():
         self.right_line = LaneLineFinder(warped_size, self.x_pixels_per_meter, self.y_pixels_per_meter, kind='RIGHT')
         self.previous_lanes = []
         self.count = 0
+        self.center_diff = None
 
     def warp(self, img):
         return cv2.warpPerspective(img, self.transform_matrix, self.warped_size,
@@ -71,19 +72,31 @@ class LaneFinder():
 
         both = (left + right)
 
+        # FIND CENTER
+        if self.left_line.found and self.right_line.found:
+            camera_center = (self.left_line.last_fitx + self.right_line.last_fitx)/2
+            self.center_diff = (camera_center - self.warped_size[0]/2) * (1 / self.x_pixels_per_meter)
+
+        side_pos = 'left'
+        if self.center_diff <= 0:
+            side_pos = 'right'
+
         warped_weighted = self.add_weighted(warped, both)
 
         unwarp_both = self.unwarp(both)
         original_weighted = self.add_weighted(image, unwarp_both)
 
-        original_weighted = self.add_curvature(original_weighted, curve)
+        original_weighted = self.add_curvature_and_center(original_weighted, curve, self.center_diff, side_pos)
 
         return original_weighted
 
-    def add_curvature(self, img, curve):
+    def add_curvature_and_center(self, img, curve, center_diff, side_pos):
         # TODO: Change ceil to round
+        # TODO: Add rounding to center diff
 
         cv2.putText(img, 'Radius of curvature = ' + str(curve) + '(m)', (50, 50),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+        cv2.putText(img, 'Vehicle is: ' + str(center_diff) + 'm ' + str(side_pos) + 'of center', (50, 100),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
         return img
 

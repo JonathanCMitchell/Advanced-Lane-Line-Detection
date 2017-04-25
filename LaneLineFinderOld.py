@@ -90,8 +90,8 @@ class LaneLineFinder():
         y = nonzeroy[lane_inds]
         self.next_coeffs = np.polyfit(y, x, 2)
 
-        if len(self.recent_coefficients) > 26:
-            # TODO: Check that there are > 25 recent_coefficients to check against not 0
+        if len(self.recent_coefficients) > 0:
+            # todo: fix issue that it starts checking after 25 frames. otherwise if you put 25 here it wont write until 25 frames
             to_check = np.mean(np.array(self.recent_coefficients[-25:]), axis = 0)
             deviation = np.abs(np.subtract(to_check, self.next_coeffs))
 

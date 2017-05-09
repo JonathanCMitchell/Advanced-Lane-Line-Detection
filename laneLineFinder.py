@@ -10,7 +10,7 @@ class LaneLineFinder():
         self.img_size = img_size
         self.x_pixels_per_meter = x_pixels_per_meter
         self.y_pixels_per_meter = y_pixels_per_meter
-        self.smooth_factor = 15
+        self.smooth_factor = 25
         self.found = False
         self.first = True
         self.kind = kind
@@ -25,7 +25,6 @@ class LaneLineFinder():
         self.firstMargin = 50
         self.nextMargin = 15
         self.recent_coefficients = []
-        self.deviations = []# TODO: Remove later
         self.curvature = None
         self.previous_curvature = None
         self.last_fitx = None
@@ -87,9 +86,9 @@ class LaneLineFinder():
         y = nonzeroy[lane_inds]
         self.next_coeffs = np.polyfit(y, x, 2)
 
+        # if the lane line deviates too much from the others, set found to false to reject outliers
         if len(self.recent_coefficients) > 0:
-            # todo: fix issue that it starts checking after 25 frames. otherwise if you put 25 here it wont write until 25 frames
-            to_check = np.mean(np.array(self.recent_coefficients[-25:]), axis = 0)
+            to_check = np.mean(np.array(self.recent_coefficients[-self.smooth_factor:]), axis = 0)
             deviation = np.abs(np.subtract(to_check, self.next_coeffs))
 
             # Average the deviations

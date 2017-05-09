@@ -1,11 +1,14 @@
 import cv2
 import numpy as np
-import settings
 from laneLineFinder import LaneLineFinder
-import math
-import matplotlib.pyplot as plt
 
 class LaneFinder():
+    """
+    This class manages the lane finding operation.
+    Methods: 
+    process_image: takes in an image (RGB) and finds the lane lines 
+    then returns that image with lane lines drawn on it.
+    """
     def __init__(self,
                  img_size,
                  warped_size,
@@ -66,14 +69,12 @@ class LaneFinder():
 
         curve = curve_left or curve_right
 
-        both = (left + right)
-        # TODO: Redo how we define both
-        inner, b = self.isGet_inner_lane()
-        if b is False:
+        inner, inner_found = self.isGet_inner_lane()
+        if inner_found is False:
             inner = self.previous_inner_lane
         lanes = left + right + inner
 
-        # FIND CENTER
+        # find center
         if self.left_line.found and self.right_line.found:
             camera_center = (self.left_line.last_fitx + self.right_line.last_fitx)/2
             self.center_diff = (camera_center - self.warped_size[0]/2) * (1 / self.x_pixels_per_meter)
@@ -94,14 +95,12 @@ class LaneFinder():
 
     def isGet_inner_lane(self):
         if self.left_line.found and self.right_line.found:
-            # self.previous_middle =
             left_fitx = self.left_line.fitx
             ploty = self.left_line.ploty
 
             right_fitx = self.right_line.fitx
             inner_lane = np.array(list(zip(
-                np.concatenate((left_fitx, \
-                                right_fitx[::-1]), axis = 0), \
+                np.concatenate((left_fitx, right_fitx[::-1]), axis = 0), \
                 np.concatenate((ploty, ploty[::-1]), axis = 0))), np.int32)
             img = np.zeros((self.warped_size[1], self.warped_size[0], 3), dtype=np.uint8)
             cv2.fillPoly(img, [inner_lane], color=[0, 255, 0])
@@ -117,6 +116,8 @@ class LaneFinder():
         2) Perspective Transform
         3) Blur
         4) Convert to HLS and LAB and use the Luminance channel to identify yellow lines
+        5) Use adaptive thresholding and morphological operations to reduce noise
+        6) Execute laneFinder's find_lane_line method to find the lane lines
         """
         if reset == True:
             self.left_line.reset_lane_line()
